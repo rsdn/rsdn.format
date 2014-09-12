@@ -1,0 +1,110 @@
+﻿syntax module RsdnMarkdown
+{
+  using PrettyPrint;
+  using Outline;
+  using TokenNames;
+  using StandardSpanClasses;
+  using Whitespaces;
+  using Identifiers;
+  using CStyleComments;
+
+  regex W                     = Whitespace; // without new line
+  regex Ws                    = Whitespace+; // without new line
+  regex Esc                   = "\\";
+  regex Smile = ":)" | ":))" | ":)))" | ":(" | ";)" | ":-\\" | SmileEx;
+  regex SC = IdentifierStartCharacter;
+  regex SmileEx = ":" SC ":" | ":" SC SC ":" | ":" SC SC SC ":" | ":" SC SC SC SC ":" | ":" SC SC SC SC SC ":";
+  regex NotAllowedUrlChar     = ']' | '|' | Ws ']' | NewLineCharacter;
+  regex NotAllowedUrlTextChar = ']' | '|' | Ws '|' | NewLineCharacter;
+  regex LanguageChar = IdentifierPartCharacters | "#" | "+";
+  regex LanguageName = LanguageChar+;
+
+
+  token Url     = (!NotAllowedUrlChar     Any)*;
+  token UrlText = (!NotAllowedUrlTextChar Any)*;
+
+  [StartRule]
+  [ExplicitSpaces]
+  syntax Paragraph = Text*;
+
+  [ExplicitSpaces]
+  syntax Text
+  {
+    | Formated = Part
+    | Plain = (!Part Any)+
+  }
+
+  [ExplicitSpaces]
+  syntax Part
+  {
+    | Bold          = Token !W PartContent* Token
+      {
+        regex Token = "**";
+        [ExplicitSpaces] syntax PartContent { | Part | W Token | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Esc Token | Token; }
+      }
+
+    | Italic        = Token !Spaces PartContent* Token
+      {
+        regex Token = "//";
+        [ExplicitSpaces] syntax PartContent { | Part | W Token | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Esc Token | Token; }
+      }
+
+    | Underline     = Token !Spaces PartContent* Token
+      {
+        regex Token = "__";
+        [ExplicitSpaces] syntax PartContent { | Part | W Token | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Esc Token | Token; }
+      }
+
+    | Strikethrough = Token !Spaces PartContent* Token
+      {
+        regex Token = "--";
+        [ExplicitSpaces] syntax PartContent { | Part | W Token | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Esc Token | Token; }
+      }
+
+    | Superscript   = Token !Spaces PartContent* Token
+      {
+        regex Token = "^^";
+        [ExplicitSpaces] syntax PartContent { | Part | W Token | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Esc Token | Token; }
+      }
+
+    | Subscript     = Token !Spaces PartContent* Token
+      {
+        regex Token = "vv";
+        [ExplicitSpaces] syntax PartContent { | Part | W Token | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Esc Token | Token; }
+      }
+
+    | Uri    = Img=('+'? '!')? "[[" s (UrlText s '|' s)? Url s "]]";
+    | Smile
+    | InlineCode = "{{" LanguageChar "{" Code=(!"}}}" Any)* "}}}"
+    | Dash = Ws "--" Ws
+    | Quotes1 = '"' PartContent* '"'
+      {
+        regex Token = '"';
+        [ExplicitSpaces] syntax PartContent { | Part | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | Esc Token | Token; }
+      }
+    | Quotes2 = "'" PartContent* "'"
+      {
+        regex Token = "'";
+        [ExplicitSpaces] syntax PartContent { | Part | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | Esc Token | Token; }
+      }
+    | Quotes3 = '«' PartContent* '»'
+      {
+        regex Token = '»';
+        [ExplicitSpaces] syntax PartContent { | Part | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Part | Esc Token | Token; }
+      }
+  }
+}
+
+/*
+
+
+*/
