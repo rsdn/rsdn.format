@@ -40,22 +40,27 @@
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <MacroReference Include="Nitra.Compiler">
+    <MacroReference Include="Nitra.Compiler, Version=0.1.1141.0, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
       <Name>Nitra.Compiler</Name>
       <AssemblyName>Nitra.Compiler.dll</AssemblyName>
-      <HintPath>..\..\Nitra\Nitra\Nitra.Compiler\bin\Debug\Stage1\Nitra.Compiler.dll</HintPath>
+      <HintPath>..\..\..\Nitra\Nitra\Nitra.Compiler\bin\Debug\Stage1\Nitra.Compiler.dll</HintPath>
       <Private>False</Private>
     </MacroReference>
     <Reference Include="mscorlib" />
-    <Reference Include="Nitra.Core">
+    <Reference Include="Nemerle, Version=1.2.0.384, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
+      <Name>Nemerle</Name>
+      <AssemblyName>Nemerle.dll</AssemblyName>
+      <HintPath>..\..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nemerle.dll</HintPath>
+    </Reference>
+    <Reference Include="Nitra.Core, Version=0.1.1141.0, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
       <Name>Nitra.Core</Name>
       <AssemblyName>Nitra.Core.dll</AssemblyName>
-      <HintPath>..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nitra.Core.dll</HintPath>
+      <HintPath>..\..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nitra.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Nitra.Runtime">
+    <Reference Include="Nitra.Runtime, Version=0.1.1141.0, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
       <Name>Nitra.Runtime</Name>
       <AssemblyName>Nitra.Runtime.dll</AssemblyName>
-      <HintPath>..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nitra.Runtime.dll</HintPath>
+      <HintPath>..\..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nitra.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
