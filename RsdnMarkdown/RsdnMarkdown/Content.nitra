@@ -1,4 +1,4 @@
-﻿syntax module RsdnMarkdown
+﻿syntax module Content
 {
   using PrettyPrint;
   using Outline;
@@ -25,10 +25,10 @@
 
   [StartRule]
   [ExplicitSpaces]
-  syntax Paragraph = Text*;
+  syntax Start = Content* !Any;
 
   [ExplicitSpaces]
-  syntax Text
+  syntax Content
   {
     | Formated = Part
     | Plain = (!Part Any)+
@@ -103,8 +103,3 @@
       }
   }
 }
-
-/*
-
-
-*/

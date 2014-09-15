@@ -21,7 +21,7 @@ module Program
       def input = ReadLine();
       when (string.IsNullOrWhiteSpace(input))
         break;
-
+/*
       def source = SingleLineSourceSnapshot(input);
       def parseResult = RsdnMarkdown.Paragraph(source, parserHost);
       def ast = RsdnMarkdownAst.Paragraph.Create(parseResult);
@@ -33,7 +33,7 @@ module Program
           def (line, col) = error.Location.StartLineColumn;
           WriteLine($<#$line:$col: $(error.Message)#>);
         }
-
+*/
       //def result = ast.Value();
       //WriteLine($"Result: $result");
     }

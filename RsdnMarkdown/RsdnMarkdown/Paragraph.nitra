@@ -1,0 +1,70 @@
+﻿syntax module Paragraph
+{
+  using PrettyPrint;
+  using Outline;
+  using TokenNames;
+  using StandardSpanClasses;
+  using Whitespaces;
+  using Identifiers;
+  using CStyleComments;
+
+  regex W               = Whitespace;  // without new line
+  regex Ws              = Whitespace+; // without new line
+  regex WsOpt           = Whitespace*; // without new line
+  regex Esc             = "\\";
+  regex UnorderedListItemPrefix = ("#" | "№")+;
+  regex OrderedListItemPrefix = "*"+;
+  regex QuotePrefix = IdentifierStartCharacter* ">"+;
+
+  [ExplicitSpaces]
+  token PartContent = (!NewLine Any)* NewLine?;
+  [ExplicitSpaces]
+  token Header = Ws !W !NewLine Header=(!NewLine Any)+;
+
+  [StartRule]
+  [ExplicitSpaces]
+  syntax Start = Content* !Any;
+
+  [ExplicitSpaces]
+  syntax Content
+  {
+    | Formated = Part
+    | Paragraph = (!Part !NewLine Any)* NewLine?
+  }
+
+  [StartRule]
+  [ExplicitSpaces]
+  syntax Part
+  {
+    | H1                = "="                     Ws    PartContent
+    | H2                = "=="                    Ws    PartContent
+    | H3                = "==="                   Ws    PartContent
+    | H4                = "===="                  Ws    PartContent
+    | H5                = "====="                 Ws    PartContent
+    | H6                = "======"                Ws    PartContent
+    | H7                = "======="               Ws    PartContent
+    | TagLine           = "@@@"                   Ws    PartContent
+    | UnorderedListItem = UnorderedListItemPrefix Ws    PartContent
+    | OrderedListItem   = OrderedListItemPrefix   Ws    PartContent
+    | Hr                = "---"                   WsOpt PartContent
+    | Quote             = QuotePrefix                   PartContent
+    | FoldedBlock       = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
+      {
+        regex Token = "+++";
+        [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Esc Token | NewLine Token; }
+      }
+    | Blockquote        = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
+      {
+        regex Token = "\"\"\"";
+        [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Esc Token | NewLine Token; }
+      }
+    | Moderator = Token PartContent* Token WsOpt NewLine?
+      {
+        regex Token = "!!!";
+        [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
+        [ExplicitSpaces] syntax PartSuffix  { | Esc Token | Token; }
+      }
+  }
+}
