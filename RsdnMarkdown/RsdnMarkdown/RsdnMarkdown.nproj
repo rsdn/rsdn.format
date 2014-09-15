@@ -85,7 +85,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.n" />
-    <Compile Include="Calc.nitra" />
+    <Compile Include="RsdnMarkdown.nitra" />
     <Compile Include="Properties\AssemblyInfo.n" />
   </ItemGroup>
   <ItemGroup>
