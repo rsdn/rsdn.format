@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <!--NitraPath Condition=" '$(NitraPath)' == '' ">g:\p\Nitra\Nitra\Nitra.Compiler\bin\Debug\Stage1\</NitraPath-->
+    <NitraCompilerPath Condition=" '$(NitraCompilerPath)' == '' ">$(NitraPath)</NitraCompilerPath>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>49b8c978-c154-4e8b-b964-89ce2f7e4663</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RsdnMarkdown</RootNamespace>
     <AssemblyName>RsdnMarkdown</AssemblyName>
@@ -18,6 +20,8 @@
     <Nemerle Condition=" '$(Nemerle)' == '' ">$(NemerleBinPathRoot)\$(NemerleVersion)</Nemerle>
     <NitraPath Condition=" '$(NitraPath)' == '' ">$(Nemerle)</NitraPath>
     <Name>RsdnMarkdown</Name>
+    <StartupObject />
+    <ApplicationIcon />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -40,27 +44,28 @@
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <MacroReference Include="Nitra.Compiler, Version=0.1.1141.0, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
+    <MacroReference Include="Nitra.Compiler">
       <Name>Nitra.Compiler</Name>
       <AssemblyName>Nitra.Compiler.dll</AssemblyName>
-      <HintPath>..\..\..\Nitra\Nitra\Nitra.Compiler\bin\Debug\Stage1\Nitra.Compiler.dll</HintPath>
+      <HintPath>$(NitraCompilerPath)\Nitra.Compiler.dll</HintPath>
       <Private>False</Private>
     </MacroReference>
     <Reference Include="mscorlib" />
-    <Reference Include="Nemerle, Version=1.2.0.384, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
+    <Reference Include="Nemerle">
       <Name>Nemerle</Name>
       <AssemblyName>Nemerle.dll</AssemblyName>
-      <HintPath>..\..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nemerle.dll</HintPath>
+      <HintPath>$(Nemerle)\Nemerle.dll</HintPath>
     </Reference>
-    <Reference Include="Nitra.Core, Version=0.1.1141.0, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
+    <Reference Include="Nitra.Core">
       <Name>Nitra.Core</Name>
       <AssemblyName>Nitra.Core.dll</AssemblyName>
-      <HintPath>..\..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nitra.Core.dll</HintPath>
+      <HintPath>$(NitraPath)\Nitra.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Nitra.Runtime, Version=0.1.1141.0, Culture=neutral, PublicKeyToken=e080a9c724e2bfcd">
+    <Reference Include="Nitra.Runtime">
       <Name>Nitra.Runtime</Name>
       <AssemblyName>Nitra.Runtime.dll</AssemblyName>
-      <HintPath>..\..\..\Nitra\Nitra\Nitra.Core\bin\Debug\Nitra.Runtime.dll</HintPath>
+      <HintPath>$(NitraPath)\Nitra.Runtime.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
