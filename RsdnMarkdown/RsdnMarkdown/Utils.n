@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using System.Net;
+using System.Net.WebUtility;
+
 using Nemerle;
 using Nemerle.Collections;
 using Nemerle.Imperative;
@@ -121,15 +123,101 @@ namespace RsdnMarkdown
       ""
     }
     
+    public ProcessContent(writer : TextWriter, ast : Ast, span : NSpan) : void
+    {
+      HtmlEncode(ast.GetText(span), writer);
+    }
+
     public ProcessContent(tag : string, writer : TextWriter, ast : Ast, span : NSpan) : void
     {
       writer.Write("<");
       writer.Write(tag);
       writer.Write(">");
-      WebUtility.HtmlEncode(ast.GetText(span), writer);
+      HtmlEncode(ast.GetText(span), writer);
       writer.Write("</");
       writer.Write(tag);
       writer.Write(">");
+    }
+    
+    public ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentAst.UrlText, NSpan]], url : ContentAst.Url) : void
+    {
+      if (imgOpt.IsSome)
+      {
+        writer.Write(<#<img src="#>);
+        writer.Write(UrlEncode(url.GetText()));
+        writer.Write("\" ");
+        when (urlTextOpt.IsSome)
+        {
+          def urlText = HtmlEncode(urlTextOpt.Item.Item1.GetText());
+          writer.Write($<#title="$urlText" alt="$urlText" #>);
+        }
+        writer.Write(">");
+      }
+      else
+      {
+        def urlValue = HtmlEncode(urlTextOpt.Item.Item1.GetText());
+        writer.Write(<#<a href="#>);
+        writer.Write(urlValue);
+        writer.Write(<#">#>);
+        def urlText = HtmlEncode(if (urlTextOpt.IsSome) urlTextOpt.Item.Item1.GetText() else url.GetText());
+        writer.Write(urlText);
+        writer.Write(<#</a>#>);
+      }
+    }
+
+    public ProcessSmile(writer : TextWriter, ast : Ast, span : NSpan) : void
+    {
+      match (ast.GetText(span))
+      {
+        | <#:)#>        => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/smile.gif">#>);
+        | <#:))#>       => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/biggrin.gif">#>);
+        | <#:)))#>      => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/lol.gif">#>);
+        | <#:(#>        => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/frown.gif">#>);
+        | <#;)#>        => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/wink.gif">#>);
+        | <#:-\#>       => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/smirk.gif">#>);
+        | <#:???:#>     => writer.Write(<#<img border="0" width="15" height="22" src="/Forum/Images/confused.gif">#>);
+        | <#:no:#>      => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/no.gif">#>);
+        | <#:up:#>      => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/sup.gif">#>);
+        | <#:down:#>    => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/down.gif">#>);
+        | <#:super:#>   => writer.Write(<#<img border="0" width="26" height="28" src="/Forum/Images/super.gif">#>);
+        | <#:shuffle:#> => writer.Write(<#<img border="0" width="15" height="20" src="/Forum/Images/shuffle.gif">#>);
+        | <#:wow:#>     => writer.Write(<#<img border="0" width="19" height="19" src="/Forum/Images/wow.gif">#>);
+        | <#:crash:#>   => writer.Write(<#<img border="0" width="30" height="30" src="/Forum/Images/crash.gif">#>);
+        | <#:user:#>    => writer.Write(<#<img border="0" width="40" height="20" src="/Forum/Images/user.gif">#>);
+        | <#:maniac:#>  => writer.Write(<#<img border="0" width="70" height="25" src="/Forum/Images/maniac.gif">#>);
+        | <#:xz:#>      => writer.Write(<#<img border="0" width="37" height="15" src="/Forum/Images/xz.gif">#>);
+        | <#:beer:#>    => writer.Write(<#<img border="0" width="57" height="16" src="/Forum/Images/beer.gif">#>);
+        | text          => HtmlEncode(text, writer);
+      }
+    }
+    
+    public ProcessCode(writer : TextWriter, ast : Ast, languageName : NSpan, code : NSpan) : void
+    {
+      writer.Write($<#<pre lang="$(ast.GetText(languageName))">#>);
+      HtmlEncode(ast.GetText(code), writer);
+      writer.Write("</pre>");
+    }
+    
+    public ProcessAutoCorrect(writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
+    {
+      writer.Write(ast.GetText(ws1));
+      match (ast.GetText(text))
+      {
+        | "--" => writer.Write("–");
+        | str => HtmlEncode(str, writer);
+      }
+      writer.Write(ast.GetText(ws2));
+    }
+
+    public BeginQuotes(writer : TextWriter, ch : char) : void
+    {
+      writer.Write(<#<div class="inline-quote">#>);
+      writer.Write(ch);
+    }
+    public EndQuotes(writer : TextWriter, ch : char) : void
+    {
+      writer.Write(ch);
+      writer.Write(<#</div>#>);
     }
   }
 }

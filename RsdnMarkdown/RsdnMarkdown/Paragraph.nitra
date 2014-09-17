@@ -55,7 +55,6 @@
     | TagLine           = "@@@"                   Ws    PartContent
     | UnorderedListItem = UnorderedListItemPrefix Ws    PartContent
     | OrderedListItem   = OrderedListItemPrefix   Ws    PartContent
-//    | Quote             = QuotePrefix                   PartContent
     | Hr                = "---"                   WsOpt NewLine?
     | FoldedBlock       = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
       {
