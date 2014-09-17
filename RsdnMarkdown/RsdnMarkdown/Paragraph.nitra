@@ -8,6 +8,12 @@
   using Identifiers;
   using CStyleComments;
 
+  using Nitra;
+  using RsdnMarkdown.Utils;
+
+  using System.IO;
+  using System.Net;
+
   regex W               = Whitespace;  // without new line
   regex Ws              = Whitespace+; // without new line
   regex WsOpt           = Whitespace*; // without new line
@@ -17,7 +23,11 @@
   regex QuotePrefix = IdentifierStartCharacter* ">"+;
 
   [ExplicitSpaces]
-  token PartContent = (!NewLine Any)* NewLine?;
+  token PartContent = Content=(!NewLine Any)* NewLine?
+  {
+    ToHtml(tag : string, writer : TextWriter) : void = ProcessContent(tag, writer, this, Content);
+  }
+
   [ExplicitSpaces]
   token Header = Ws !W !NewLine Header=(!NewLine Any)+;
 
@@ -29,7 +39,7 @@
   syntax Content
   {
     | Formated = Part
-    | Paragraph = (!Part !NewLine Any)* NewLine?
+    | Paragraph = Content=(!Part !NewLine Any)* NewLine?
   }
 
   [StartRule]
@@ -42,12 +52,11 @@
     | H4                = "===="                  Ws    PartContent
     | H5                = "====="                 Ws    PartContent
     | H6                = "======"                Ws    PartContent
-    | H7                = "======="               Ws    PartContent
     | TagLine           = "@@@"                   Ws    PartContent
     | UnorderedListItem = UnorderedListItemPrefix Ws    PartContent
     | OrderedListItem   = OrderedListItemPrefix   Ws    PartContent
-    | Hr                = "---"                   WsOpt PartContent
-    | Quote             = QuotePrefix                   PartContent
+//    | Quote             = QuotePrefix                   PartContent
+    | Hr                = "---"                   WsOpt NewLine?
     | FoldedBlock       = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
       {
         regex Token = "+++";

@@ -1,0 +1,135 @@
+﻿using System.Text;
+using System.Net;
+using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Imperative;
+using Nemerle.Text;
+using Nemerle.Utility;
+
+using Nitra;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace RsdnMarkdown
+{
+  public module Utils
+  {
+    public SplitQuotations(reader : TextReader) : List[KeyValuePair[string, string]]
+    {
+      def blocks = List();
+      mutable line;
+      while ({ line = reader.ReadLine(); line != null })
+      {
+        def prefix = GetPrefix(line);
+        blocks.Add(KeyValuePair(prefix, line.Substring(prefix.Length)));
+      }
+
+      NormalizeBlocks(blocks);
+      blocks
+    }
+    
+    NormalizeBlocks(blocks : List[KeyValuePair[string, string]]) : void
+    {
+      mutable lastPrefix;
+      def nextPrefix(blocks : List[_], mutable i : int) : string
+      {
+        for (i++; i < blocks.Count; i++)
+        {
+          def prefix = blocks[i].Key;
+          when (prefix != "")
+            return prefix;
+        }
+        
+        null
+      }
+      
+      for (mutable i = 0; i < blocks.Count; i++)
+      {
+        def prefix = blocks[i].Key;
+        def text = blocks[i].Value;
+        
+        if (prefix == "" && string.IsNullOrWhiteSpace(text))
+        {
+          def nextPrefix = nextPrefix(blocks, i);
+          when (nextPrefix == lastPrefix)
+          {
+            blocks[i] = KeyValuePair(lastPrefix, text);
+          }
+        }
+        else
+          lastPrefix = prefix;
+      }
+      
+      lastPrefix = null;
+      def parts = List();
+      for (mutable i = 0; i < blocks.Count; i++)
+      {
+        def prefix = blocks[i].Key;
+        
+        for (mutable j = i + 1; j < blocks.Count; j++)
+        {
+          def nextPrefix = blocks[j].Key;
+
+          if (prefix == nextPrefix)
+            parts.Add(blocks[j].Value);
+          else
+            break;
+        }
+        
+        when (parts.Count > 0)
+        {
+          blocks.RemoveRange(i + 1, parts.Count);
+          parts.Insert(0, blocks[i].Value);
+          blocks[i] = KeyValuePair(prefix, string.Join(Environment.NewLine, parts));
+          parts.Clear();
+        }
+        
+        lastPrefix = prefix;
+      }
+    }
+    
+    public GetPrefix(line : string) : string
+    {
+      mutable bingo;
+      
+      for (mutable i = 0; i < line.Length; i++)
+      {
+        def ch = line[i];
+        when (char.IsLetter(ch) || ch == '_')
+          continue;
+        
+        for (; i < line.Length; i++)
+        {
+          def ch = line[i];
+          when (ch == '>')
+          {
+            bingo = true;
+            continue;
+          }
+          
+          break;
+        }
+        
+        if (bingo)
+          return line.Substring(0, i);
+        else
+          return "";
+      }
+      
+      ""
+    }
+    
+    public ProcessContent(tag : string, writer : TextWriter, ast : Ast, span : NSpan) : void
+    {
+      writer.Write("<");
+      writer.Write(tag);
+      writer.Write(">");
+      WebUtility.HtmlEncode(ast.GetText(span), writer);
+      writer.Write("</");
+      writer.Write(tag);
+      writer.Write(">");
+    }
+  }
+}
