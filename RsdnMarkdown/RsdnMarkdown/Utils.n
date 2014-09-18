@@ -86,6 +86,30 @@ namespace RsdnMarkdown
       ""
     }
     
+    public GetUriScheme(uri : string) : string
+    {
+      when (uri.StartsWith("http:", StringComparison.InvariantCultureIgnoreCase))
+        return "http";
+      when (uri.StartsWith("https:", StringComparison.InvariantCultureIgnoreCase))
+        return "https";
+      
+      for (mutable i = 0; i < uri.Length; i++)
+      {
+        def ch = uri[i];
+        when (char.IsLetter(ch))
+          continue;
+        
+        i++;
+        
+        when (i < uri.Length && uri[i] == ':')
+          return uri.Substring(0, i - 1);
+        
+        return "";
+      }
+      
+      ""
+    }
+    
     NormalizeBlocks(blocks : List[KeyValuePair[string, string]]) : void
     {
       mutable lastPrefix;
@@ -164,23 +188,25 @@ namespace RsdnMarkdown
     
     internal ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentAst.UrlText, NSpan]], url : ContentAst.Url) : void
     {
+      def urlSource = url.GetText().Trim();
+      def urlSource = if (GetUriScheme(urlSource).Length == 0) "http://" + urlSource else urlSource;
+
       if (imgOpt.IsSome)
       {
         writer.Write(<#<img src="#>);
-        writer.Write(UrlEncode(url.GetText()));
+        HtmlAttributeEncode(writer, urlSource);
         writer.Write("\" ");
         when (urlTextOpt.IsSome)
         {
-          def urlText = HtmlEncode(urlTextOpt.Item.Item1.GetText());
+          def urlText = HtmlAttributeEncode(urlTextOpt.Item.Item1.GetText());
           writer.Write($<#title="$urlText" alt="$urlText" #>);
         }
         writer.Write(">");
       }
       else
       {
-        def urlValue = HtmlEncode(url.GetText());
         writer.Write(<#<a href="#>);
-        writer.Write(urlValue);
+        HtmlAttributeEncode(writer, urlSource);
         writer.Write(<#">#>);
         def urlText = HtmlEncode(if (urlTextOpt.IsSome) urlTextOpt.Item.Item1.GetText() else url.GetText());
         writer.Write(urlText);
@@ -188,6 +214,16 @@ namespace RsdnMarkdown
       }
     }
 
+    internal HtmlAttributeEncode(writer : TextWriter, str : string) : void
+    {
+      writer.Write(HtmlAttributeEncode(str));
+    }
+    
+    internal HtmlAttributeEncode(str : string) : string
+    {
+      str.Replace("\"", "&quot;")
+    }
+    
     internal ProcessSmile(writer : TextWriter, ast : Ast, span : NSpan) : void
     {
       match (ast.GetText(span))
@@ -234,13 +270,13 @@ namespace RsdnMarkdown
 
     internal BeginQuotes(writer : TextWriter, ch : char) : void
     {
-      writer.Write(<#<div class="inline-quote">#>);
+      writer.Write(<#<span class="inline-quote">#>);
       writer.Write(ch);
     }
     internal EndQuotes(writer : TextWriter, ch : char) : void
     {
       writer.Write(ch);
-      writer.Write(<#</div>#>);
+      writer.Write(<#</span>#>);
     }
   }
 }
