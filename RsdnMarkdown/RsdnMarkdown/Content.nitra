@@ -23,6 +23,7 @@ syntax module Content
   regex NotAllowedUrlTextChar = ']' | '|' | Ws '|' | NewLineCharacter;
   regex LanguageChar = IdentifierPartCharacters | "#" | "+";
   regex LanguageName = LanguageChar*;
+  regex EscSeq = "'" | '"' | "«" | "»" | "**" | "//" | "__" | "--" | "^^" | "vv";
 
 
   token Url     = (!NotAllowedUrlChar     Any)*;
@@ -175,6 +176,7 @@ syntax module Content
         }
         [ExplicitSpaces] syntax PartSuffix  { | Part | Esc Token | Token; }
       }
+    | Esc = "\\" EscSeq  { override ToHtml = ProcessContent(writer, this, EscSeq); }
     | Quotes2 = "'" PartContent* "'"
       {
         override ToHtml { BeginQuotes(writer, '\''); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '\''); }

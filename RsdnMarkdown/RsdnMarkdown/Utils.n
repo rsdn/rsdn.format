@@ -172,7 +172,8 @@ namespace RsdnMarkdown
     
     internal ProcessContent(writer : TextWriter, ast : Ast, span : NSpan) : void
     {
-      HtmlEncode(ast.GetText(span), writer);
+      def str = ast.GetText(span);
+      HtmlEncode(str, writer);
     }
 
     internal ProcessContent(tag : string, writer : TextWriter, ast : Ast, span : NSpan) : void
