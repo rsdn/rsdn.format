@@ -18,6 +18,29 @@ namespace RsdnMarkdown
 {
   public module Utils
   {
+    public ProcessQuotationBlock(block : string) : List[string]
+    {
+      def parserHost  = ParserHost();
+      def sb          = StringBuilder();
+      def writer      = StringWriter(sb);
+      def reader      = StringReader(block);
+      def result      = List();
+
+      for (mutable line = reader.ReadLine(); line != null; line = reader.ReadLine())
+      {
+        def paragraph = line;
+        def source      = SingleLineSourceSnapshot(paragraph);
+        def parseResult = Content.Start(source, parserHost);
+        def ast         = ContentAst.Start.Create(parseResult);
+        sb.Length = 0;
+        ast.ToHtml(writer);
+        writer.Flush();
+        result.Add(sb.ToString());
+      }
+      
+      result
+    }
+
     public SplitQuotations(reader : TextReader) : List[KeyValuePair[string, string]]
     {
       def blocks = List();
@@ -30,6 +53,37 @@ namespace RsdnMarkdown
 
       NormalizeBlocks(blocks);
       blocks
+    }
+    
+    public GetPrefix(line : string) : string
+    {
+      mutable bingo;
+      
+      for (mutable i = 0; i < line.Length; i++)
+      {
+        def ch = line[i];
+        when (char.IsLetter(ch) || ch == '_')
+          continue;
+        
+        for (; i < line.Length; i++)
+        {
+          def ch = line[i];
+          when (ch == '>')
+          {
+            bingo = true;
+            continue;
+          }
+          
+          break;
+        }
+        
+        if (bingo)
+          return line.Substring(0, i);
+        else
+          return "";
+      }
+      
+      ""
     }
     
     NormalizeBlocks(blocks : List[KeyValuePair[string, string]]) : void
@@ -92,43 +146,12 @@ namespace RsdnMarkdown
       }
     }
     
-    public GetPrefix(line : string) : string
-    {
-      mutable bingo;
-      
-      for (mutable i = 0; i < line.Length; i++)
-      {
-        def ch = line[i];
-        when (char.IsLetter(ch) || ch == '_')
-          continue;
-        
-        for (; i < line.Length; i++)
-        {
-          def ch = line[i];
-          when (ch == '>')
-          {
-            bingo = true;
-            continue;
-          }
-          
-          break;
-        }
-        
-        if (bingo)
-          return line.Substring(0, i);
-        else
-          return "";
-      }
-      
-      ""
-    }
-    
-    public ProcessContent(writer : TextWriter, ast : Ast, span : NSpan) : void
+    internal ProcessContent(writer : TextWriter, ast : Ast, span : NSpan) : void
     {
       HtmlEncode(ast.GetText(span), writer);
     }
 
-    public ProcessContent(tag : string, writer : TextWriter, ast : Ast, span : NSpan) : void
+    internal ProcessContent(tag : string, writer : TextWriter, ast : Ast, span : NSpan) : void
     {
       writer.Write("<");
       writer.Write(tag);
@@ -139,7 +162,7 @@ namespace RsdnMarkdown
       writer.Write(">");
     }
     
-    public ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentAst.UrlText, NSpan]], url : ContentAst.Url) : void
+    internal ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentAst.UrlText, NSpan]], url : ContentAst.Url) : void
     {
       if (imgOpt.IsSome)
       {
@@ -155,7 +178,7 @@ namespace RsdnMarkdown
       }
       else
       {
-        def urlValue = HtmlEncode(urlTextOpt.Item.Item1.GetText());
+        def urlValue = HtmlEncode(url.GetText());
         writer.Write(<#<a href="#>);
         writer.Write(urlValue);
         writer.Write(<#">#>);
@@ -165,40 +188,40 @@ namespace RsdnMarkdown
       }
     }
 
-    public ProcessSmile(writer : TextWriter, ast : Ast, span : NSpan) : void
+    internal ProcessSmile(writer : TextWriter, ast : Ast, span : NSpan) : void
     {
       match (ast.GetText(span))
       {
-        | <#:)#>        => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/smile.gif">#>);
-        | <#:))#>       => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/biggrin.gif">#>);
-        | <#:)))#>      => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/lol.gif">#>);
-        | <#:(#>        => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/frown.gif">#>);
-        | <#;)#>        => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/wink.gif">#>);
-        | <#:-\#>       => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/smirk.gif">#>);
-        | <#:???:#>     => writer.Write(<#<img border="0" width="15" height="22" src="/Forum/Images/confused.gif">#>);
-        | <#:no:#>      => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/no.gif">#>);
-        | <#:up:#>      => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/sup.gif">#>);
-        | <#:down:#>    => writer.Write(<#<img border="0" width="15" height="15" src="/Forum/Images/down.gif">#>);
-        | <#:super:#>   => writer.Write(<#<img border="0" width="26" height="28" src="/Forum/Images/super.gif">#>);
-        | <#:shuffle:#> => writer.Write(<#<img border="0" width="15" height="20" src="/Forum/Images/shuffle.gif">#>);
-        | <#:wow:#>     => writer.Write(<#<img border="0" width="19" height="19" src="/Forum/Images/wow.gif">#>);
-        | <#:crash:#>   => writer.Write(<#<img border="0" width="30" height="30" src="/Forum/Images/crash.gif">#>);
-        | <#:user:#>    => writer.Write(<#<img border="0" width="40" height="20" src="/Forum/Images/user.gif">#>);
-        | <#:maniac:#>  => writer.Write(<#<img border="0" width="70" height="25" src="/Forum/Images/maniac.gif">#>);
-        | <#:xz:#>      => writer.Write(<#<img border="0" width="37" height="15" src="/Forum/Images/xz.gif">#>);
-        | <#:beer:#>    => writer.Write(<#<img border="0" width="57" height="16" src="/Forum/Images/beer.gif">#>);
+        | <#:)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smile.gif">#>);
+        | <#:))#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/biggrin.gif">#>);
+        | <#:)))#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/lol.gif">#>);
+        | <#:(#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/frown.gif">#>);
+        | <#;)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/wink.gif">#>);
+        | <#:-\#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smirk.gif">#>);
+        | <#:???:#>     => writer.Write(<#<img border="0" width="15" height="22" src="http://rsdn.ru/Forum/Images/confused.gif">#>);
+        | <#:no:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/no.gif">#>);
+        | <#:up:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/sup.gif">#>);
+        | <#:down:#>    => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/down.gif">#>);
+        | <#:super:#>   => writer.Write(<#<img border="0" width="26" height="28" src="http://rsdn.ru/Forum/Images/super.gif">#>);
+        | <#:shuffle:#> => writer.Write(<#<img border="0" width="15" height="20" src="http://rsdn.ru/Forum/Images/shuffle.gif">#>);
+        | <#:wow:#>     => writer.Write(<#<img border="0" width="19" height="19" src="http://rsdn.ru/Forum/Images/wow.gif">#>);
+        | <#:crash:#>   => writer.Write(<#<img border="0" width="30" height="30" src="http://rsdn.ru/Forum/Images/crash.gif">#>);
+        | <#:user:#>    => writer.Write(<#<img border="0" width="40" height="20" src="http://rsdn.ru/Forum/Images/user.gif">#>);
+        | <#:maniac:#>  => writer.Write(<#<img border="0" width="70" height="25" src="http://rsdn.ru/Forum/Images/maniac.gif">#>);
+        | <#:xz:#>      => writer.Write(<#<img border="0" width="37" height="15" src="http://rsdn.ru/Forum/Images/xz.gif">#>);
+        | <#:beer:#>    => writer.Write(<#<img border="0" width="57" height="16" src="http://rsdn.ru/Forum/Images/beer.gif">#>);
         | text          => HtmlEncode(text, writer);
       }
     }
     
-    public ProcessCode(writer : TextWriter, ast : Ast, languageName : NSpan, code : NSpan) : void
+    internal ProcessCode(writer : TextWriter, ast : Ast, languageName : NSpan, code : NSpan) : void
     {
-      writer.Write($<#<pre lang="$(ast.GetText(languageName))">#>);
+      writer.Write($<#<span class="code" lang="$(ast.GetText(languageName))">#>);
       HtmlEncode(ast.GetText(code), writer);
-      writer.Write("</pre>");
+      writer.Write("</span>");
     }
     
-    public ProcessAutoCorrect(writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
+    internal ProcessAutoCorrect(writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
     {
       writer.Write(ast.GetText(ws1));
       match (ast.GetText(text))
@@ -209,12 +232,12 @@ namespace RsdnMarkdown
       writer.Write(ast.GetText(ws2));
     }
 
-    public BeginQuotes(writer : TextWriter, ch : char) : void
+    internal BeginQuotes(writer : TextWriter, ch : char) : void
     {
       writer.Write(<#<div class="inline-quote">#>);
       writer.Write(ch);
     }
-    public EndQuotes(writer : TextWriter, ch : char) : void
+    internal EndQuotes(writer : TextWriter, ch : char) : void
     {
       writer.Write(ch);
       writer.Write(<#</div>#>);

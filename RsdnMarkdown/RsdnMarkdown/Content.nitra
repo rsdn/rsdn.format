@@ -159,7 +159,7 @@ syntax module Content
       }
     | Smile                                                       { override ToHtml = ProcessSmile(writer, this, Smile); }
     | InlineCode = "{{" LanguageName "{" Code=(!"}}}" Any)* "}}}" { override ToHtml = ProcessCode(writer, this, LanguageName, Code); }
-    | Dash = Ws Text="--" Ws                                           { override ToHtml = ProcessAutoCorrect(writer, this, Ws1, Text, Ws2); }
+    | Dash = Ws Text="--" Ws                                      { override ToHtml = ProcessAutoCorrect(writer, this, Ws1, Text, Ws2); }
     | Quotes1 = Quote1='"' PartContent* Quote2='"' 
       {
         override ToHtml { BeginQuotes(writer, '"'); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '"'); }
