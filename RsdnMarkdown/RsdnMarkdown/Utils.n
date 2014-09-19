@@ -23,21 +23,30 @@ namespace RsdnMarkdown
       def parserHost  = ParserHost();
       def sb          = StringBuilder();
       def writer      = StringWriter(sb);
-      def reader      = StringReader(block);
       def result      = List();
+      //def reader      = StringReader(block);
 
-      for (mutable line = reader.ReadLine(); line != null; line = reader.ReadLine())
+      //for (mutable line = reader.ReadLine(); line != null; line = reader.ReadLine())
+      //{
+      //  def paragraph = line;
+      //  def source      = SingleLineSourceSnapshot(paragraph);
+      //  def parseResult = ContentSyntax.Start(source, parserHost);
+      //  def ast         = ContentSyntaxAst.Start.Create(parseResult);
+      //  sb.Length = 0;
+      //  ast.ToHtml(writer);
+      //  writer.Flush();
+      //  result.Add(sb.ToString());
+      //}
+
+      def source          = SourceSnapshot(block);
+      def parseResult     = ParagraphSyntax.Start(source, parserHost);
+      def declarationRoot = parseResult.GetDeclarationRoot();
+      def paragraphRoot   = declarationRoot.Content :> Declarations.Root;
+      foreach (p in paragraphRoot.Paragraphs)
       {
-        def paragraph = line;
-        def source      = SingleLineSourceSnapshot(paragraph);
-        def parseResult = Content.Start(source, parserHost);
-        def ast         = ContentAst.Start.Create(parseResult);
-        sb.Length = 0;
-        ast.ToHtml(writer);
-        writer.Flush();
-        result.Add(sb.ToString());
+        System.Diagnostics.Debug.WriteLine(p.ToString());
       }
-      
+
       result
     }
 
@@ -187,7 +196,7 @@ namespace RsdnMarkdown
       writer.Write(">");
     }
     
-    internal ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentAst.UrlText, NSpan]], url : ContentAst.Url) : void
+    internal ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentSyntaxAst.UrlText, NSpan]], url : ContentSyntaxAst.Url) : void
     {
       def urlSource = url.GetText().Trim();
       def urlSource = if (GetUriScheme(urlSource).Length == 0) "http://" + urlSource else urlSource;

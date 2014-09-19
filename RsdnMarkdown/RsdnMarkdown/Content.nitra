@@ -3,200 +3,203 @@
 using System.IO;
 using System.Net;
 
-syntax module Content
+namespace RsdnMarkdown
 {
-  using PrettyPrint;
-  using Outline;
-  using TokenNames;
-  using StandardSpanClasses;
-  using Whitespaces;
-  using Identifiers;
-  using CStyleComments;
-
-  regex W                     = Whitespace; // without new line
-  regex Ws                    = Whitespace+; // without new line
-  regex Esc                   = "\\";
-  regex Smile = ":)" | ":))" | ":)))" | ":(" | ";)" | ":-\\" | SmileEx;
-  regex SC = IdentifierStartCharacter;
-  regex SmileEx = ":" SC ":" | ":" SC SC ":" | ":" SC SC SC ":" | ":" SC SC SC SC ":" | ":" SC SC SC SC SC ":";
-  regex NotAllowedUrlChar     = ']' | '|' | Ws ']' | NewLineCharacter;
-  regex NotAllowedUrlTextChar = ']' | '|' | Ws '|' | NewLineCharacter;
-  regex LanguageChar = IdentifierPartCharacters | "#" | "+";
-  regex LanguageName = LanguageChar*;
-  regex EscSeq = "'" | '"' | "«" | "»" | "**" | "//" | "__" | "--" | "^^" | "vv";
-
-
-  token Url     = (!NotAllowedUrlChar     Any)*;
-  token UrlText = (!NotAllowedUrlTextChar Any)*;
-
-  [StartRule]
-  [ExplicitSpaces]
-  syntax Start = Content* !Any
+  syntax module ContentSyntax
   {
-    ToHtml(writer : TextWriter) : void = foreach (content in Contents) content.ToHtml(writer);
-  }
+    using PrettyPrint;
+    using Outline;
+    using TokenNames;
+    using StandardSpanClasses;
+    using Whitespaces;
+    using Identifiers;
+    using CStyleComments;
 
-  [ExplicitSpaces]
-  syntax Content
-  {
-    ToHtml(writer : TextWriter) : void;
+    regex W                     = Whitespace; // without new line
+    regex Ws                    = Whitespace+; // without new line
+    regex Esc                   = "\\";
+    regex Smile = ":)" | ":))" | ":)))" | ":(" | ";)" | ":-\\" | SmileEx;
+    regex SC = IdentifierStartCharacter;
+    regex SmileEx = ":" SC ":" | ":" SC SC ":" | ":" SC SC SC ":" | ":" SC SC SC SC ":" | ":" SC SC SC SC SC ":";
+    regex NotAllowedUrlChar     = ']' | '|' | Ws ']' | NewLineCharacter;
+    regex NotAllowedUrlTextChar = ']' | '|' | Ws '|' | NewLineCharacter;
+    regex LanguageChar = IdentifierPartCharacters | "#" | "+";
+    regex LanguageName = LanguageChar*;
+    regex EscSeq = "'" | '"' | "«" | "»" | "**" | "//" | "__" | "--" | "^^" | "vv";
 
-    | Formated = Part           { override ToHtml = Part.ToHtml(writer); }
-    | Plain = Text=(!Part Any)+ { override ToHtml = ProcessContent(writer, this, Text); }
-  }
 
-  [ExplicitSpaces]
-  syntax Part
-  {
-    ToHtml(writer : TextWriter) : void;
+    token Url     = (!NotAllowedUrlChar     Any)*;
+    token UrlText = (!NotAllowedUrlTextChar Any)*;
 
-    | Bold          = Token !W PartContent* Token
-      {
-        override ToHtml { writer.Write("<strong>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</strong>"); }
+    [StartRule]
+    [ExplicitSpaces]
+    syntax Start = Content* !Any
+    {
+      ToHtml(writer : TextWriter) : void = foreach (content in Contents) content.ToHtml(writer);
+    }
 
-        regex Token = "**";
-        [ExplicitSpaces] syntax PartContent
+    [ExplicitSpaces]
+    syntax Content
+    {
+      ToHtml(writer : TextWriter) : void;
+
+      | Formated = Part           { override ToHtml = Part.ToHtml(writer); }
+      | Plain = Text=(!Part Any)+ { override ToHtml = ProcessContent(writer, this, Text); }
+    }
+
+    [ExplicitSpaces]
+    syntax Part
+    {
+      ToHtml(writer : TextWriter) : void;
+
+      | Bold          = Token !W PartContent* Token
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { writer.Write("<strong>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</strong>"); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = "**";
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
-      }
 
-    | Italic        = Token !Spaces PartContent* Token
-      {
-        override ToHtml { writer.Write("<em>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</em>"); }
-
-        regex Token = "//";
-        [ExplicitSpaces] syntax PartContent
+      | Italic        = Token !Spaces PartContent* Token
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { writer.Write("<em>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</em>"); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = "//";
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
-      }
 
-    | Underline     = Token !Spaces PartContent* Token
-      {
-        override ToHtml { writer.Write("<u>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</u>"); }
-
-        regex Token = "__";
-        [ExplicitSpaces] syntax PartContent
+      | Underline     = Token !Spaces PartContent* Token
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { writer.Write("<u>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</u>"); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = "__";
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
-      }
 
-    | Strikethrough = Token !Spaces PartContent* Token
-      {
-        override ToHtml { writer.Write("<del>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</del>"); }
-
-        regex Token = "--";
-        [ExplicitSpaces] syntax PartContent
+      | Strikethrough = Token !Spaces PartContent* Token
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { writer.Write("<del>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</del>"); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = "--";
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
-      }
 
-    | Superscript   = Token !Spaces PartContent* Token
-      {
-        override ToHtml { writer.Write("<sup>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</sup>"); }
-
-        regex Token = "^^";
-        [ExplicitSpaces] syntax PartContent
+      | Superscript   = Token !Spaces PartContent* Token
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { writer.Write("<sup>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</sup>"); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = "^^";
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
-      }
 
-    | Subscript     = Token !Spaces PartContent* Token
-      {
-        override ToHtml { writer.Write("<sub>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</sub>"); }
-
-        regex Token = "vv";
-        [ExplicitSpaces] syntax PartContent
+      | Subscript     = Token !Spaces PartContent* Token
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { writer.Write("<sub>"); foreach (x in PartContents) x.ToHtml(writer); writer.Write("</sub>"); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = "vv";
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | W Token                          { override ToHtml = ProcessContent(writer, this, this.Location.Span); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | W Token | Token; }
-      }
 
-    | Uri    = Img? "[[" s UrlTextOpt=(UrlText s '|' s)? Url s "]]"
-      {
-        override ToHtml = ProcessUri(writer, ImgOpt, UrlTextOpt, Url);
-
-        regex Img = '+'? '!';
-      }
-    | Smile                                                       { override ToHtml = ProcessSmile(writer, this, Smile); }
-    | InlineCode = "{{" LanguageName "{" Code=(!"}}}" Any)* "}}}" { override ToHtml = ProcessCode(writer, this, LanguageName, Code); }
-    | Dash = Ws Text="--" Ws                                      { override ToHtml = ProcessAutoCorrect(writer, this, Ws1, Text, Ws2); }
-    | Quotes1 = Quote1='"' PartContent* Quote2='"' 
-      {
-        override ToHtml { BeginQuotes(writer, '"'); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '"'); }
-
-        regex Token = '"';
-        [ExplicitSpaces] syntax PartContent
+      | Uri    = Img? "[[" s UrlTextOpt=(UrlText s '|' s)? Url s "]]"
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml = ProcessUri(writer, ImgOpt, UrlTextOpt, Url);
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Img = '+'? '!';
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | Token; }
-      }
-    | EscPart = "\\" EscSeq  { override ToHtml = ProcessContent(writer, this, EscSeq); }
-    | Quotes2 = "'" PartContent* "'"
-      {
-        override ToHtml { BeginQuotes(writer, '\''); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '\''); }
-
-        regex Token = "'";
-        [ExplicitSpaces] syntax PartContent
+      | Smile                                                       { override ToHtml = ProcessSmile(writer, this, Smile); }
+      | InlineCode = "{{" LanguageName "{" Code=(!"}}}" Any)* "}}}" { override ToHtml = ProcessCode(writer, this, LanguageName, Code); }
+      | Dash = Ws Text="--" Ws                                      { override ToHtml = ProcessAutoCorrect(writer, this, Ws1, Text, Ws2); }
+      | Quotes1 = Quote1='"' PartContent* Quote2='"' 
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { BeginQuotes(writer, '"'); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '"'); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = '"';
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | Token; }
-      }
-    | Quotes3 = '«' PartContent* '»'
-      {
-        override ToHtml { BeginQuotes(writer, '«'); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '»'); }
-
-        regex Token = '»';
-        [ExplicitSpaces] syntax PartContent
+      | EscPart = "\\" EscSeq  { override ToHtml = ProcessContent(writer, this, EscSeq); }
+      | Quotes2 = "'" PartContent* "'"
         {
-          ToHtml(writer : TextWriter) : void;
+          override ToHtml { BeginQuotes(writer, '\''); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '\''); }
 
-          | Part                             { override ToHtml = Part.ToHtml(writer); }
-          | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          regex Token = "'";
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | Token; }
         }
-        [ExplicitSpaces] syntax PartSuffix  { | Part | Token; }
-      }
+      | Quotes3 = '«' PartContent* '»'
+        {
+          override ToHtml { BeginQuotes(writer, '«'); foreach (x in PartContents) x.ToHtml(writer); EndQuotes(writer, '»'); }
+
+          regex Token = '»';
+          [ExplicitSpaces] syntax PartContent
+          {
+            ToHtml(writer : TextWriter) : void;
+
+            | Part                             { override ToHtml = Part.ToHtml(writer); }
+            | Plain = Text=(!PartSuffix Any)+  { override ToHtml = ProcessContent(writer, this, Text); }
+          }
+          [ExplicitSpaces] syntax PartSuffix  { | Part | Token; }
+        }
+    }
   }
 }

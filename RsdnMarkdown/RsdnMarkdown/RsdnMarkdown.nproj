@@ -89,8 +89,10 @@
     </MacroReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Main.n" />
     <Compile Include="Content.nitra" />
+    <Compile Include="Declarations.nitra">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.n" />
     <Compile Include="Utils.n">
       <SubType>Code</SubType>

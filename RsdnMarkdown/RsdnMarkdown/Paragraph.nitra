@@ -1,78 +1,81 @@
-﻿syntax module Paragraph
+﻿namespace RsdnMarkdown
 {
-  using PrettyPrint;
-  using Outline;
-  using TokenNames;
-  using StandardSpanClasses;
-  using Whitespaces;
-  using Identifiers;
-  using CStyleComments;
-
-  using Nitra;
-  using RsdnMarkdown.Utils;
-
-  using System.IO;
-  using System.Net;
-
-  regex W               = Whitespace;  // without new line
-  regex Ws              = Whitespace+; // without new line
-  regex WsOpt           = Whitespace*; // without new line
-  regex Esc             = "\\";
-  regex UnorderedListItemPrefix = ("#" | "№")+;
-  regex OrderedListItemPrefix = "*"+;
-  regex QuotePrefix = IdentifierStartCharacter* ">"+;
-
-  [ExplicitSpaces]
-  token PartContent = Content=(!NewLine Any)* NewLine?
+  syntax module ParagraphSyntax
   {
-    ToHtml(tag : string, writer : TextWriter) : void = ProcessContent(tag, writer, this, Content);
-  }
+    using PrettyPrint;
+    using Outline;
+    using TokenNames;
+    using StandardSpanClasses;
+    using Whitespaces;
+    using Identifiers;
+    using CStyleComments;
 
-  [ExplicitSpaces]
-  token Header = Ws !W !NewLine Header=(!NewLine Any)+;
+    using Nitra;
+    using RsdnMarkdown.Utils;
 
-  [StartRule]
-  [ExplicitSpaces]
-  syntax Start = Content* !Any;
+    using System.IO;
+    using System.Net;
 
-  [ExplicitSpaces]
-  syntax Content
-  {
-    | Formated = Part
-    | Paragraph = Content=(!Part !NewLine Any)* NewLine?
-  }
+    regex W               = Whitespace;  // without new line
+    regex Ws              = Whitespace+; // without new line
+    regex WsOpt           = Whitespace*; // without new line
+    regex Esc             = "\\";
+    regex UnorderedListItemPrefix = ("#" | "№")+;
+    regex OrderedListItemPrefix = "*"+;
+    regex QuotePrefix = IdentifierStartCharacter* ">"+;
 
-  [StartRule]
-  [ExplicitSpaces]
-  syntax Part
-  {
-    | H1                = "="                     Ws    PartContent
-    | H2                = "=="                    Ws    PartContent
-    | H3                = "==="                   Ws    PartContent
-    | H4                = "===="                  Ws    PartContent
-    | H5                = "====="                 Ws    PartContent
-    | H6                = "======"                Ws    PartContent
-    | TagLine           = "@@@"                   Ws    PartContent
-    | UnorderedListItem = UnorderedListItemPrefix Ws    PartContent
-    | OrderedListItem   = OrderedListItemPrefix   Ws    PartContent
-    | Hr                = "---"                   WsOpt NewLine?
-    | FoldedBlock       = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
-      {
-        regex Token = "+++";
-        [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
-        [ExplicitSpaces] syntax PartSuffix  { | Esc Token | NewLine Token; }
-      }
-    | Blockquote        = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
-      {
-        regex Token = "\"\"\"";
-        [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
-        [ExplicitSpaces] syntax PartSuffix  { | Esc Token | NewLine Token; }
-      }
-    | Moderator = Token PartContent* Token WsOpt NewLine?
-      {
-        regex Token = "!!!";
-        [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
-        [ExplicitSpaces] syntax PartSuffix  { | Esc Token | Token; }
-      }
+    [ExplicitSpaces]
+    token PartContent = Content=(!NewLine Any)* NewLine?
+    {
+      ToHtml(tag : string, writer : TextWriter) : void = ProcessContent(tag, writer, this, Content);
+    }
+
+    [ExplicitSpaces]
+    token Header = Ws !W !NewLine Header=(!NewLine Any)+;
+
+    [StartRule]
+    [ExplicitSpaces]
+    syntax Start = Content* !Any;
+
+    [ExplicitSpaces]
+    syntax Content
+    {
+      | Formated = Part
+      | Paragraph = Content=(!Part !NewLine Any)* NewLine?
+    }
+
+    [StartRule]
+    [ExplicitSpaces]
+    syntax Part
+    {
+      | H1                = "="                     Ws    PartContent
+      | H2                = "=="                    Ws    PartContent
+      | H3                = "==="                   Ws    PartContent
+      | H4                = "===="                  Ws    PartContent
+      | H5                = "====="                 Ws    PartContent
+      | H6                = "======"                Ws    PartContent
+      | TagLine           = "@@@"                   Ws    PartContent
+      | UnorderedListItem = UnorderedListItemPrefix Ws    PartContent
+      | OrderedListItem   = OrderedListItemPrefix   Ws    PartContent
+      | Hr                = "---"                   WsOpt NewLine?
+      | FoldedBlock       = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
+        {
+          regex Token = "+++";
+          [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
+          [ExplicitSpaces] syntax PartSuffix  { | Esc Token | NewLine Token; }
+        }
+      | Blockquote        = Token Header? WsOpt NewLine PartContent* NewLine Token WsOpt NewLine?
+        {
+          regex Token = "\"\"\"";
+          [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
+          [ExplicitSpaces] syntax PartSuffix  { | Esc Token | NewLine Token; }
+        }
+      | Moderator = Token PartContent* Token WsOpt NewLine?
+        {
+          regex Token = "!!!";
+          [ExplicitSpaces] syntax PartContent { | Esc Token | Plain = (!PartSuffix Any)+ }
+          [ExplicitSpaces] syntax PartSuffix  { | Esc Token | Token; }
+        }
+    }
   }
 }
