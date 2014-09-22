@@ -39,7 +39,7 @@ namespace RsdnMarkdown.Declarations
   declare Paragraph.Plain from ParagraphSyntax.Content.Paragraph
   {
     Content = Content;
-    Eol     = NewLineOpt.Location.Span;
+    Eol     = End.Location.Span;
   }
 
   declare Paragraph from ParagraphSyntax.Part
@@ -54,8 +54,8 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content = PartContent.Location.Span; Level = UnorderedListItemPrefix.Length; }
     | OrderedListItem   { Content = PartContent.Location.Span; Level = OrderedListItemPrefix.Length;   }
     | Hr                {}
-    | FoldedBlock       { Content = PartContents.Location.Span; }
     | Blockquote        { Content = PartContents.Location.Span; }
+    | FoldedBlock       { Content = PartContents.Location.Span; }
     | Moderator         { Content = PartContents.Location.Span; }
   }
 }
