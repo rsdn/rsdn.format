@@ -1,5 +1,6 @@
 ﻿namespace RsdnMarkdown
 {
+  [ExplicitSpaces]
   syntax module ParagraphSyntax
   {
     using PrettyPrint;
@@ -24,17 +25,14 @@
     regex OrderedListItemPrefix = "*"+;
     regex QuotePrefix = IdentifierStartCharacter* ">"+;
 
-    [ExplicitSpaces]
     token PartContent = Content=(!NewLine Any)*
     {
       ToHtml(tag : string, writer : TextWriter) : void = ProcessContent(tag, writer, this, Content);
     }
 
-    [ExplicitSpaces]
     token Header = Ws !W !NewLine Header=(!NewLine Any)+;
 
     [StartRule]
-    [ExplicitSpaces]
     syntax Start = Content* !Any;
 
     token End
@@ -43,14 +41,12 @@
       | Eof = !Any
     }
 
-    [ExplicitSpaces]
     syntax Content
     {
       | Formated = Part End
       | Paragraph = !Part Content=(!NewLine Any)* End
     }
 
-    [ExplicitSpaces]
     syntax Content2
     {
       | Formated = Part
@@ -58,7 +54,6 @@
     }
 
     [StartRule]
-    [ExplicitSpaces]
     syntax Part
     {
       | H1                = "="                     Ws    PartContent
@@ -74,17 +69,17 @@
       | Blockquote        = "<\"" Header? WsOpt NewLine PartContent* Token WsOpt
         {
           regex Token = "\">";
-          [ExplicitSpaces] syntax PartContent = !Token Content;
+          syntax PartContent = !Token Content;
         }
       | FoldedBlock       = "<+"  Header  WsOpt NewLine PartContent* Token WsOpt
         {
           regex Token = "+>";
-          [ExplicitSpaces] syntax PartContent = !Token Content;
+          syntax PartContent = !Token Content;
         }
       | Moderator         = "<!"          WsOpt NewLine PartContent* Token WsOpt
         {
           regex Token = "!>";
-          [ExplicitSpaces] syntax PartContent = !Token Content;
+          syntax PartContent = !Token Content;
         }
     }
   }
