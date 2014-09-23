@@ -47,12 +47,6 @@
       | Paragraph = !Part Content=(!NewLine Any)* End
     }
 
-    syntax Content2
-    {
-      | Formated = Part
-      | Paragraph = Content=(!Part !NewLine Any)*
-    }
-
     [StartRule]
     syntax Part
     {

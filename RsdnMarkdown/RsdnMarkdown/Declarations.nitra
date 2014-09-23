@@ -1,4 +1,5 @@
 ﻿using Nitra;
+using System.Linq;
 
 namespace RsdnMarkdown.Declarations
 {
@@ -24,15 +25,12 @@ namespace RsdnMarkdown.Declarations
         Content : Nitra.NSpan;
         Eol     : Nitra.NSpan;
       }
-    | FoldedBlock { Content : Nitra.NSpan; }
-    | Blockquote  { Content : Nitra.NSpan; }
-    | Moderator   { Content : Nitra.NSpan; }
+    | FoldedBlock { Content : Paragraph*; }
+    | Blockquote  { Content : Paragraph*; }
+    | Moderator   { Content : Paragraph*; }
   }
 
-  declare Root from ParagraphSyntax.Start
-  {
-    Paragraphs <- Contents;
-  }
+  declare Root from ParagraphSyntax.Start { Paragraphs <- Contents; }
 
   declare Paragraph       from ParagraphSyntax.Content;
   declare Paragraph       from ParagraphSyntax.Content.Formated = Part.GetDeclaration(parent);
@@ -54,8 +52,12 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content = PartContent.Location.Span; Level = UnorderedListItemPrefix.Length; }
     | OrderedListItem   { Content = PartContent.Location.Span; Level = OrderedListItemPrefix.Length;   }
     | Hr                {}
-    | Blockquote        { Content = PartContents.Location.Span; }
-    | FoldedBlock       { Content = PartContents.Location.Span; }
-    | Moderator         { Content = PartContents.Location.Span; }
+    | Blockquote        { Content <- PartContents; }
+    | FoldedBlock       { Content <- PartContents; }
+    | Moderator         { Content <- PartContents; }
   }
+
+  declare Paragraph       from ParagraphSyntax.Part.Blockquote.PartContent;
+  declare Paragraph       from ParagraphSyntax.Part.FoldedBlock.PartContent;
+  declare Paragraph       from ParagraphSyntax.Part.Moderator.PartContent;
 }

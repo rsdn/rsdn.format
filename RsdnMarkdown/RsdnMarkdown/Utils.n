@@ -1,6 +1,5 @@
-﻿using System.Text;
-using System.Net;
-using System.Net.WebUtility;
+﻿using Nitra;
+using Nitra.Declarations;
 
 using Nemerle;
 using Nemerle.Collections;
@@ -8,11 +7,18 @@ using Nemerle.Imperative;
 using Nemerle.Text;
 using Nemerle.Utility;
 
-using Nitra;
+using RsdnMarkdown.Declarations;
+
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Net;
+using System.Net.WebUtility;
+
+using SCG = System.Collections.Generic;
 
 namespace RsdnMarkdown
 {
@@ -24,28 +30,81 @@ namespace RsdnMarkdown
       def sb          = StringBuilder();
       def writer      = StringWriter(sb);
       def result      = List();
-      //def reader      = StringReader(block);
 
-      //for (mutable line = reader.ReadLine(); line != null; line = reader.ReadLine())
-      //{
-      //  def paragraph = line;
-      //  def source      = SingleLineSourceSnapshot(paragraph);
-      //  def parseResult = ContentSyntax.Start(source, parserHost);
-      //  def ast         = ContentSyntaxAst.Start.Create(parseResult);
-      //  sb.Length = 0;
-      //  ast.ToHtml(writer);
-      //  writer.Flush();
-      //  result.Add(sb.ToString());
-      //}
+      def processContent(contentSpan : NSpan)
+      {
+        def paragraph   = block.Substring(contentSpan.StartPos, contentSpan.Length);
+        def source      = SingleLineSourceSnapshot(paragraph);
+        def parseResult = ContentSyntax.Start(source, parserHost);
+        def ast         = ContentSyntaxAst.Start.Create(parseResult);
+        sb.Length = 0;
+        ast.ToHtml(writer);
+      }
+      
+      def listStack = SCG.Stack();
+      mutable prevLevel;
+      mutable prevIsOrdered;
+      def closeList()
+      {
+      }
+      def preList(level : int, isOrdered : bool) : void
+      {
+        when (prevLevel > 0 && prevLevel == level && prevIsOrdered != isOrdered)
+        {
+          // Списки на одном урочне, но с разным типом нумерации
+          writer.Write(if (prevIsOrdered) "<ol>" else "<ul>");
+          _ = listStack.Pop();
+          listStack.Push(isOrdered);
+          prevIsOrdered = isOrdered;
+          writer.Write(if (isOrdered) "<ol>" else "<ul>");
+          return;
+        }
+        
+        if (level < prevLevel)
+        {
+          writer.Write(if (prevIsOrdered) "</ol>" else "</ul>");
+          prevIsOrdered = listStack.Pop();
+          prevLevel = listStack.Count;
+        }
+        else when (level > prevLevel)
+        {
+          writer.Write(if (isOrdered) "<ol>" else "<ul>");
+          listStack.Push(isOrdered);
+          prevLevel = listStack.Count;
+        }
+      }
+      
+      def processDecls(paragraphs : DeclarationList[Paragraph])
+      {
+        foreach (paragraph in paragraphs)
+        {
+          mutable currentLevel;
+          
+          match (paragraph)
+          {
+            | H1                as p => writer.Write("<h1>");              processContent(p.Content);    writer.Write("</h1>");
+            | H2                as p => writer.Write("<h2>");              processContent(p.Content);    writer.Write("</h2>");
+            | H3                as p => writer.Write("<h3>");              processContent(p.Content);    writer.Write("</h3>");
+            | H4                as p => writer.Write("<h4>");              processContent(p.Content);    writer.Write("</h4>");
+            | H5                as p => writer.Write("<h5>");              processContent(p.Content);    writer.Write("</h5>");
+            | H6                as p => writer.Write("<h6>");              processContent(p.Content);    writer.Write("</h6>");
+            | TagLine           as p => writer.Write("<TagLine>");         processContent(p.Content);    writer.Write("</TagLine>");
+            | Blockquote        as p => writer.WriteLine("<blockquote>");  processDecls(p.Content);              writer.WriteLine("</blockquote>");
+            | FoldedBlock       as p => writer.WriteLine("<div>");         processDecls(p.Content);              writer.WriteLine("</div>");
+            | Moderator         as p => writer.WriteLine("<div>");         processDecls(p.Content);              writer.WriteLine("</div>");
+            | UnorderedListItem as p => preList(p.Level, false);   writer.Write("<li>");              processContent(p.Content);    writer.Write("</li>");
+            | OrderedListItem   as p => preList(p.Level, false);   writer.Write("<li>");              processContent(p.Content);    writer.Write("</li>");
+            | Hr                     => writer.Write("<hr>");
+            | _ => ()
+          }
+        }
+      }
 
       def source          = SourceSnapshot(block);
       def parseResult     = ParagraphSyntax.Start(source, parserHost);
       def declarationRoot = parseResult.GetDeclarationRoot();
       def paragraphRoot   = declarationRoot.Content :> Declarations.Root;
-      foreach (p in paragraphRoot.Paragraphs)
-      {
-        System.Diagnostics.Debug.WriteLine(p.ToString());
-      }
+      processDecls(paragraphRoot.Paragraphs);
 
       result
     }
