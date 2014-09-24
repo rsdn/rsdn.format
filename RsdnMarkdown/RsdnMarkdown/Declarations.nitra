@@ -10,6 +10,7 @@ namespace RsdnMarkdown.Declarations
 
   declarations Paragraph
   {
+    | Plain             { Content : Nitra.NSpan; Eol : Nitra.NSpan; }
     | H1                { Content : Nitra.NSpan; }
     | H2                { Content : Nitra.NSpan; }
     | H3                { Content : Nitra.NSpan; }
@@ -20,11 +21,6 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content : Nitra.NSpan; Level : int; }
     | OrderedListItem   { Content : Nitra.NSpan; Level : int; }
     | Hr {}
-    | Plain
-      {
-        Content : Nitra.NSpan;
-        Eol     : Nitra.NSpan;
-      }
     | FoldedBlock { Content : Paragraph*; }
     | Blockquote  { Content : Paragraph*; }
     | Moderator   { Content : Paragraph*; }

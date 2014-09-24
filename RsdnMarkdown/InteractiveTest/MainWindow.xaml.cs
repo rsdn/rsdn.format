@@ -47,7 +47,7 @@ namespace InteractiveTest
       sb.AppendLine("<table border=\"1\" width=\"100%\">");
       foreach (var block in blocks)
       {
-        var blockContent = string.Join("<br>\r\n", Utils.ProcessQuotationBlock(block.Value));
+        var blockContent = Utils.ProcessQuotationBlock(block.Value);
         sb.AppendLine("<tr><td><b>" + block.Key + "</b></td><td>" + blockContent + "</td></tr>");
       }
       sb.AppendLine("</table>");

@@ -24,79 +24,107 @@ namespace RsdnMarkdown
 {
   public module Utils
   {
-    public ProcessQuotationBlock(block : string) : List[string]
+    public ProcessQuotationBlock(block : string) : string
     {
       def parserHost  = ParserHost();
       def sb          = StringBuilder();
       def writer      = StringWriter(sb);
-      def result      = List();
 
-      def processContent(contentSpan : NSpan)
+      def content(contentSpan : NSpan)
       {
         def paragraph   = block.Substring(contentSpan.StartPos, contentSpan.Length);
         def source      = SingleLineSourceSnapshot(paragraph);
         def parseResult = ContentSyntax.Start(source, parserHost);
         def ast         = ContentSyntaxAst.Start.Create(parseResult);
-        sb.Length = 0;
         ast.ToHtml(writer);
       }
       
       def listStack = SCG.Stack();
       mutable prevLevel;
       mutable prevIsOrdered;
-      def closeList()
+      mutable isListItem;
+      
+      def tryCloseList() : void
       {
+        when (!isListItem && prevLevel > 0)
+        {
+          prevLevel = 0;
+          prevIsOrdered = false;
+          while (listStack.Count > 0)
+          {
+            def isOrdered = listStack.Pop();
+            writer.WriteLine(if (isOrdered) "</ol>" else "</ul>");
+          }
+        }
       }
-      def preList(level : int, isOrdered : bool) : void
+      def close(tag : string) : void
       {
-        when (prevLevel > 0 && prevLevel == level && prevIsOrdered != isOrdered)
+        writer.WriteLine(tag);
+      }
+      def open(tag : string) : void
+      {
+        tryCloseList();
+        writer.Write(tag);
+      }
+      def openBlock(tag : string) : void
+      {
+        tryCloseList();
+        writer.WriteLine(tag);
+      }
+      def openListItem(level : int, isOrdered : bool) : void
+      {
+        isListItem = true;
+        
+        if (prevLevel > 0 && prevLevel == level && prevIsOrdered != isOrdered)
         {
           // Списки на одном урочне, но с разным типом нумерации
-          writer.Write(if (prevIsOrdered) "<ol>" else "<ul>");
+          writer.WriteLine(if (prevIsOrdered) "<ol>" else "<ul>");
           _ = listStack.Pop();
           listStack.Push(isOrdered);
           prevIsOrdered = isOrdered;
           writer.Write(if (isOrdered) "<ol>" else "<ul>");
-          return;
         }
-        
-        if (level < prevLevel)
+        else if (level < prevLevel)
         {
-          writer.Write(if (prevIsOrdered) "</ol>" else "</ul>");
+          writer.WriteLine(if (prevIsOrdered) "</ol>" else "</ul>");
           prevIsOrdered = listStack.Pop();
           prevLevel = listStack.Count;
         }
         else when (level > prevLevel)
         {
-          writer.Write(if (isOrdered) "<ol>" else "<ul>");
+          writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
           listStack.Push(isOrdered);
           prevLevel = listStack.Count;
         }
+
+        writer.Write("<li>");
       }
-      
-      def processDecls(paragraphs : DeclarationList[Paragraph])
+      def decls(paragraphs : DeclarationList[Paragraph])
       {
         foreach (paragraph in paragraphs)
         {
-          mutable currentLevel;
-          
+          isListItem = false;
+
           match (paragraph)
           {
-            | H1                as p => writer.Write("<h1>");              processContent(p.Content);    writer.Write("</h1>");
-            | H2                as p => writer.Write("<h2>");              processContent(p.Content);    writer.Write("</h2>");
-            | H3                as p => writer.Write("<h3>");              processContent(p.Content);    writer.Write("</h3>");
-            | H4                as p => writer.Write("<h4>");              processContent(p.Content);    writer.Write("</h4>");
-            | H5                as p => writer.Write("<h5>");              processContent(p.Content);    writer.Write("</h5>");
-            | H6                as p => writer.Write("<h6>");              processContent(p.Content);    writer.Write("</h6>");
-            | TagLine           as p => writer.Write("<TagLine>");         processContent(p.Content);    writer.Write("</TagLine>");
-            | Blockquote        as p => writer.WriteLine("<blockquote>");  processDecls(p.Content);              writer.WriteLine("</blockquote>");
-            | FoldedBlock       as p => writer.WriteLine("<div>");         processDecls(p.Content);              writer.WriteLine("</div>");
-            | Moderator         as p => writer.WriteLine("<div>");         processDecls(p.Content);              writer.WriteLine("</div>");
-            | UnorderedListItem as p => preList(p.Level, false);   writer.Write("<li>");              processContent(p.Content);    writer.Write("</li>");
-            | OrderedListItem   as p => preList(p.Level, false);   writer.Write("<li>");              processContent(p.Content);    writer.Write("</li>");
-            | Hr                     => writer.Write("<hr>");
-            | _ => ()
+            | Plain             as p => open("<p>");                  content(p.Content);  close("</p>");
+            | H1                as p => open("<h1>");                 content(p.Content);  close("</h1>");
+            | H2                as p => open("<h2>");                 content(p.Content);  close("</h2>");
+            | H3                as p => open("<h3>");                 content(p.Content);  close("</h3>");
+            | H4                as p => open("<h4>");                 content(p.Content);  close("</h4>");
+            | H5                as p => open("<h5>");                 content(p.Content);  close("</h5>");
+            | H6                as p => open("<h6>");                 content(p.Content);  close("</h6>");
+            | TagLine           as p => open("<TagLine>");            content(p.Content);  close("</TagLine>");
+            | UnorderedListItem as p => openListItem(p.Level, false); content(p.Content);  close("</li>");
+            | OrderedListItem   as p => openListItem(p.Level, true);  content(p.Content);  close("</li>");
+            | Blockquote        as p => openBlock("<blockquote>");    decls(p.Content);    close("</blockquote>");
+            | FoldedBlock       as p => openBlock("<div>");           decls(p.Content);    close("</div>");
+            | Moderator         as p => openBlock("<div>");           decls(p.Content);    close("</div>");
+            | Hr                     => openBlock("<hr>");
+            | _ => assert2(false, "No implementation for " + paragraph.GetType().Name);
           }
+          
+          assert2(prevLevel >= 0);
         }
       }
 
@@ -104,9 +132,9 @@ namespace RsdnMarkdown
       def parseResult     = ParagraphSyntax.Start(source, parserHost);
       def declarationRoot = parseResult.GetDeclarationRoot();
       def paragraphRoot   = declarationRoot.Content :> Declarations.Root;
-      processDecls(paragraphRoot.Paragraphs);
+      decls(paragraphRoot.Paragraphs);
 
-      result
+      sb.ToString()
     }
 
     public SplitQuotations(reader : TextReader) : List[KeyValuePair[string, string]]

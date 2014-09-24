@@ -17,13 +17,13 @@
     using System.IO;
     using System.Net;
 
-    regex W               = Whitespace;  // without new line
-    regex Ws              = Whitespace+; // without new line
-    regex WsOpt           = Whitespace*; // without new line
-    regex Esc             = "\\";
-    regex UnorderedListItemPrefix = ("#" | "№")+;
-    regex OrderedListItemPrefix = "*"+;
-    regex QuotePrefix = IdentifierStartCharacter* ">"+;
+    regex W                       = Whitespace;  // without new line
+    regex Ws                      = Whitespace+; // without new line
+    regex WsOpt                   = Whitespace*; // without new line
+    regex Esc                     = "\\";
+    regex OrderedListItemPrefix   = ("#" | "№")+;
+    regex UnorderedListItemPrefix = "*"+;
+    regex QuotePrefix             = IdentifierStartCharacter* ">"+;
 
     token PartContent = Content=(!NewLine Any)*
     {
