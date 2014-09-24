@@ -17,6 +17,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.WebUtility;
+using System.Web.Util.HttpEncoder; // TODO: Перевести на это дело!
 
 using SCG = System.Collections.Generic;
 
@@ -107,19 +108,19 @@ namespace RsdnMarkdown
 
           match (paragraph)
           {
-            | Plain             as p => open("<p>");                  content(p.Content);  close("</p>");
-            | H1                as p => open("<h1>");                 content(p.Content);  close("</h1>");
-            | H2                as p => open("<h2>");                 content(p.Content);  close("</h2>");
-            | H3                as p => open("<h3>");                 content(p.Content);  close("</h3>");
-            | H4                as p => open("<h4>");                 content(p.Content);  close("</h4>");
-            | H5                as p => open("<h5>");                 content(p.Content);  close("</h5>");
-            | H6                as p => open("<h6>");                 content(p.Content);  close("</h6>");
-            | TagLine           as p => open("<TagLine>");            content(p.Content);  close("</TagLine>");
-            | UnorderedListItem as p => openListItem(p.Level, false); content(p.Content);  close("</li>");
-            | OrderedListItem   as p => openListItem(p.Level, true);  content(p.Content);  close("</li>");
-            | Blockquote        as p => openBlock("<blockquote>");    decls(p.Content);    close("</blockquote>");
-            | FoldedBlock       as p => openBlock("<div>");           decls(p.Content);    close("</div>");
-            | Moderator         as p => openBlock("<div>");           decls(p.Content);    close("</div>");
+            | Plain             as p => open("<p>");                              content(p.Content);  close("</p>");
+            | H1                as p => open("<h1>");                             content(p.Content);  close("</h1>");
+            | H2                as p => open("<h2>");                             content(p.Content);  close("</h2>");
+            | H3                as p => open("<h3>");                             content(p.Content);  close("</h3>");
+            | H4                as p => open("<h4>");                             content(p.Content);  close("</h4>");
+            | H5                as p => open("<h5>");                             content(p.Content);  close("</h5>");
+            | H6                as p => open("<h6>");                             content(p.Content);  close("</h6>");
+            | TagLine           as p => open("<div class='tagline'>");            content(p.Content);  close("</div>");
+            | UnorderedListItem as p => openListItem(p.Level, false);             content(p.Content);  close("</li>");
+            | OrderedListItem   as p => openListItem(p.Level, true);              content(p.Content);  close("</li>");
+            | Blockquote        as p => openBlock("<blockquote>");                decls(p.Content);    close("</blockquote>");
+            | FoldedBlock       as p => openBlock("<div class='foldable'>");      decls(p.Content);    close("</div>");
+            | Moderator         as p => openBlock("<div class='moderator'>");     decls(p.Content);    close("</div>");
             | Hr                     => openBlock("<hr>");
             | _ => assert2(false, "No implementation for " + paragraph.GetType().Name);
           }
@@ -290,6 +291,11 @@ namespace RsdnMarkdown
 
       if (imgOpt.IsSome)
       {
+        when (imgOpt.Location.GetText() == "+!")
+        {
+          // Вот здесь нужно сгенерировать хтмл скрывающегося блока
+          // class='foldable'
+        }
         writer.Write(<#<img src="#>);
         HtmlAttributeEncode(writer, urlSource);
         writer.Write("\" ");
@@ -347,11 +353,21 @@ namespace RsdnMarkdown
       }
     }
     
+    // TODO: Сделать поддержку таблиц
+    
     internal ProcessCode(writer : TextWriter, ast : Ast, languageName : NSpan, code : NSpan) : void
     {
-      writer.Write($<#<span class="code" lang="$(ast.GetText(languageName))">#>);
+      // TODO: Сделать версию для инлайн и отдельного блока кода.
+      def lang = 
+        match (ast.GetText(languageName))
+        {
+          | "C#" | "c#"   => "cs"
+          | "C++" | "c++" => "cpp"
+          | txt           => txt
+        };
+      writer.Write($<#<code class="code $lang">#>);
       HtmlEncode(ast.GetText(code), writer);
-      writer.Write("</span>");
+      writer.Write("</code>");
     }
     
     internal ProcessAutoCorrect(writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
