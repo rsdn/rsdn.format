@@ -1,0 +1,129 @@
+﻿// Standard font faces&colors
+@font-family-main: Verdana, Geneva, sans-serif;
+@font-family-headers: Arial, Helvetica, sans-serif;
+@colors-face-light: #D5F2FF;
+@colors-face-lightdark: #95C2CF;
+@colors-face-dark: #216184;
+
+// Standard colors
+@colors-text-dark: #4580A0;
+@colors-tinted-bg: #cfe5f0;
+@colors-tinted-bg-light: #EFEFF2;
+@colors-border: #65a7cb;
+@colors-bg-grad-start: #7DBFE3;
+@colors-bg-grad-end: #4D8FB3;
+@colors-note-bg: #FFFFE7;
+@colors-note-border: #f2d473;
+@colors-note-face: #8a6900;
+
+// links
+@link-underline-opacity: 0.4;
+@colors-link: #4682B4;
+@colors-link-underline: rgba(70, 130, 180, @link-underline-opacity);
+@colors-link-hover: #d23232;
+@colors-link-hover-underline: rgba(210, 50, 50, @link-underline-opacity);
+@colors-link-visited: #B40EB4;
+@colors-link-visited-underline: rgb(180, 14, 180, @link-underline-opacity);
+@colors-hdr-link: black;
+@colors-hdr-link-underline: rgba(0, 0, 0, @link-underline-opacity);
+@link-ease-out: 0.4s;
+
+// mixins
+.font-icon() {
+	font-family: FontAwesome;
+	font-variant: normal;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.font-icon-before(@char) {
+	.font-icon;
+
+	&:before {
+		content: @char;
+	}
+}
+
+.font-icon-after(@char) {
+	.font-icon;
+
+	&:after {
+		content: @char;
+	}
+}
+
+.font-zocial-icon() {
+	font-family: zocial;
+	font-variant: normal;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	line-height: 1;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.header-font() {
+	font-size: 14px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-variant: small-caps;
+}
+
+// Boxes
+@box-border-width: 1px;
+@box-padding: 5px;
+
+.box (@color) {
+	border: 1px solid @color;
+	margin-bottom: 10px;
+	overflow: hidden;
+
+	.box-title {
+		color: white;
+		font-size: 14px;
+		font-family: Arial, Helvetica, sans-serif;
+		font-variant: small-caps;
+		background-color: @color;
+		padding: 3px 3px 3px 10px;
+
+		.rss {
+			float: right;
+			border: 0;
+		}
+	}
+
+	ul.refs {
+		list-style: none;
+		margin: 0px;
+		padding: 3px;
+		background-color: @colors-tinted-bg;
+
+		li {
+			display: inline;
+			margin-right: 10px;
+
+			&:before {
+				.font-icon();
+				content: '\f08e  ';
+				color: @colors-link;
+			}
+		}
+	}
+
+	.box-content {
+		padding: @box-padding;
+
+		td {
+			white-space: nowrap;
+		}
+	}
+}
+
+.item-count() {
+	color: red;
+	vertical-align: super;
+}

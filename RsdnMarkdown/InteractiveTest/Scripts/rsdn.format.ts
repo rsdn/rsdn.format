@@ -1,4 +1,6 @@
-﻿declare module hljs {
+﻿/// <reference path="typings/jquery/jquery.d.ts"/>
+
+declare module hljs {
 	export function highlightBlock(block: Node): void;
 }
 

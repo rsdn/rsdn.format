@@ -252,42 +252,42 @@
 .format .quota.level3 .quota-prefix:after {
   content: '>>>';
 }
-.format .quota.level4 .quota-prefix:after {
+.format .quota.level4 .quota-prefix:before {
   content: '>>>>';
 }
-.format .quota.level5 .quota-prefix:after {
+.format .quota.level5 .quota-prefix:before {
   content: '>>>>>';
 }
-.format .quota.level6 .quota-prefix:after {
+.format .quota.level6 .quota-prefix:before {
   content: '>>>>>>';
 }
-.format .quota.level7 .quota-prefix:after {
+.format .quota.level7 .quota-prefix:before {
   content: '>>>>>>>';
 }
-.format .quota.level8 .quota-prefix:after {
+.format .quota.level8 .quota-prefix:before {
   content: '>>>>>>>>';
 }
-.format .quota.level9 .quota-prefix:after {
+.format .quota.level9 .quota-prefix:before {
   content: '>>>>>>>>>';
 }
-.format .quota.level10 .quota-prefix:after {
+.format .quota.level10 .quota-prefix:before {
   content: '>>>>>>>>>>';
 }
-.format .quota.level11 .quota-prefix:after {
+.format .quota.level11 .quota-prefix:before {
   content: '>>>>>>>>>>>';
 }
-.format .quota.level12 .quota-prefix:after {
+.format .quota.level12 .quota-prefix:before {
   content: '>>>>>>>>>>>>';
 }
-.format .quota.level13 .quota-prefix:after {
+.format .quota.level13 .quota-prefix:before {
   content: '>>>>>>>>>>>>>';
 }
-.format .quota.level14 .quota-prefix:after {
+.format .quota.level14 .quota-prefix:before {
   content: '>>>>>>>>>>>>>>';
 }
-.format .quota.level15 .quota-prefix:after {
+.format .quota.level15 .quota-prefix:before {
   content: '>>>>>>>>>>>>>>>';
 }
-.format .quota.level-max .quota-prefix:after {
+.format .quota.level-max .quota-prefix:before {
   content: '>…>';
 }
