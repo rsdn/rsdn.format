@@ -1,0 +1,321 @@
+﻿@import "../Content/site-vars.less";
+@import "../Content/vendor-prefixes.less";
+
+.format {
+	/* Base style */
+	font-family: @font-family-main;
+	font-size: 13px;
+	/* Links */
+	a {
+		color: @colors-link;
+		text-decoration: none;
+		border-bottom: 1px solid @colors-link-underline;
+		.transition(color, @link-ease-out);
+
+		&:hover, &:visited:hover {
+			color: @colors-link-hover;
+			border-bottom-color: @colors-link-hover-underline;
+		}
+
+		&:visited {
+			color: @colors-link-visited;
+			border-bottom-color: @colors-link-visited-underline;
+		}
+	}
+	/* Foldable structures*/
+	.block-name {
+		font-weight: bold;
+
+		&:before {
+			.font-icon();
+			color: @colors-face-dark;
+			font-size: 16px;
+			margin-right: 4px;
+			vertical-align: middle;
+		}
+	}
+
+	.foldable {
+		p {
+			margin-top: 0;
+		}
+
+		.block-name {
+			cursor: pointer;
+
+			&:before {
+				content: '\f147';
+			}
+
+			& + * {
+				border-left: 3px solid @colors-border;
+				padding-left: 6px;
+				margin-left: 4px;
+			}
+		}
+
+		&.folded .block-name:before {
+			content: '\f196';
+		}
+
+		&.folded .block-name + * {
+			display: none;
+		}
+	}
+	/* Image */
+	.image .block-name:before {
+		content: '\f03e';
+	}
+
+	.foldable.image {
+		& .block-name:before {
+			content: '\f147  \f03e';
+		}
+
+		&.folded .block-name:before {
+			content: '\f196  \f03e';
+		}
+	}
+	/* Quotes */
+	blockquote {
+		background-color: @colors-note-bg;
+		margin: 6px 30px 6px 30px !important;
+		border: 1px solid @colors-note-border !important;
+		border-left-width: 4px !important;
+		padding: 5px 10px 5px 10px;
+
+		&:before {
+			display: block;
+			height: 12px;
+			margin-top: -12px;
+			content: "“";
+			margin-left: -50px;
+			font: italic 64px Cochin,Georgia,"Times New Roman", serif;
+			color: @colors-note-border;
+		}
+
+		p {
+			margin-top: -2px;
+			margin-bottom: 0;
+		}
+	}
+	/* Code */
+	.code {
+		white-space: pre;
+		background-color: @colors-tinted-bg-light;
+		font-family: Consolas, "Courier New", Courier, monospace;
+		border: 1px solid #D0D0D0 !important;
+		border-left-width: 4px !important;
+		margin: 4px 30px 4px 30px !important;
+		padding: 2px 10px;
+		overflow: visible;
+
+		&:before {
+			display: block;
+			height: 12px;
+			margin-top: -4px;
+			content: "</>";
+			margin-left: -46px;
+			font: bold 16px Cochin,Georgia,"Times New Roman", serif;
+			color: #D0D0D0;
+		}
+	}
+	/* Headers */
+	h1, h2, h3, h4, h5, h6 {
+		font-variant: small-caps;
+		text-align: left;
+		color: @colors-face-dark;
+	}
+
+	h1 {
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 24px;
+		font-weight: bolder;
+		margin-top: 6px;
+		margin-bottom: 6px;
+	}
+
+	h2 {
+		font-size: 20px;
+		font-weight: lighter;
+		margin-top: 5px;
+		margin-bottom: 5px;
+	}
+
+	h3 {
+		font-size: 18px;
+		font-weight: bold;
+		margin-top: 4px;
+		margin-bottom: 4px;
+	}
+
+	h4 {
+		font-size: 18px;
+		margin-left: 0.1em;
+		font-weight: lighter;
+		margin-top: 3px;
+		margin-bottom: 3px;
+	}
+
+	h5 {
+		font-size: 14px;
+		font-weight: bold;
+		margin-top: 2px;
+		margin-bottom: 2px;
+	}
+
+	h6 {
+		font-size: 14px;
+		font-weight: lighter;
+		margin-top: 2px;
+		margin-bottom: 2px;
+	}
+
+	/* Lists */
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	ul li {
+		padding-left: 16px;
+	}
+
+	ul li:before, ul ul ul ul li:before {
+		content: "• ";
+		color: @colors-face-dark;
+	}
+
+	ul ul li:before {
+		content: "▪ ";
+		font-size: 1.3em;
+	}
+
+	ul ul ul li:before {
+		content: "▫ ";
+		font-size: 1.3em;
+	}
+
+	/* HR*/
+	hr {
+		display: block;
+		border-color: @colors-border;
+	}
+
+	/* Other stuff */
+	.tagline {
+		color: #d3acac;
+		margin: 4px;
+	}
+
+	.moderator {
+		padding: 2px;
+		color: #800000;
+		border: 1px solid #800000;
+		background-color: #ffcccc;
+		margin: 4px;
+	}
+
+	@emoticon-size: 15px;
+	/* Emoticons */
+	.emoticon {
+		display: inline-block;
+		width: @emoticon-size;
+		height: @emoticon-size;
+		background-image: url(smiles.png);
+
+		&.smile {
+			background-position-x: 0*-@emoticon-size;
+		}
+		&.biggrin {
+			background-position-x: 1*-@emoticon-size;
+		}
+		&.lol {
+			background-position-x: 2*-@emoticon-size;
+		}
+		&.frown {
+			background-position-x: 3*-@emoticon-size;
+		}
+		&.wink {
+			background-position-x: 4*-@emoticon-size;
+		}
+		&.smirk {
+			background-position-x: 5*-@emoticon-size;
+		}
+		&.confused {
+			background-position-x: 6*-@emoticon-size;
+		}
+	}
+
+	/* Quotas */
+	.quota {
+		color: #c1e5b9; // level > 3
+
+		.quota-prefix {
+			font-weight: bold;
+			margin-right: 4px;
+		}
+
+		&.level1 {
+			color: #137900;
+			.quota-prefix:after {
+				content: '>';
+			}
+		}
+
+		&.level2 {
+			color: #74b967;
+			.quota-prefix:after {
+				content: '>>';
+			}
+		}
+
+		&.level3 {
+			color: #9fd095;
+			.quota-prefix:after {
+				content: '>>>';
+			}
+		}
+
+		&.level4 .quota-prefix:before {
+			content: '>>>>';
+		}
+		&.level5 .quota-prefix:before {
+			content: '>>>>>';
+		}
+		&.level6 .quota-prefix:before {
+			content: '>>>>>>';
+		}
+		&.level7 .quota-prefix:before {
+			content: '>>>>>>>';
+		}
+		&.level8 .quota-prefix:before {
+			content: '>>>>>>>>';
+		}
+		&.level9 .quota-prefix:before {
+			content: '>>>>>>>>>';
+		}
+		&.level10 .quota-prefix:before {
+			content: '>>>>>>>>>>';
+		}
+		&.level11 .quota-prefix:before {
+			content: '>>>>>>>>>>>';
+		}
+		&.level12 .quota-prefix:before {
+			content: '>>>>>>>>>>>>';
+		}
+		&.level13 .quota-prefix:before {
+			content: '>>>>>>>>>>>>>';
+		}
+		&.level14 .quota-prefix:before {
+			content: '>>>>>>>>>>>>>>';
+		}
+		&.level15 .quota-prefix:before {
+			content: '>>>>>>>>>>>>>>>';
+		}
+		&.level-max .quota-prefix:before {
+			content: '>…>';
+		}
+	}
+}

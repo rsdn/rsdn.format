@@ -21,8 +21,8 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content : Nitra.NSpan; Level : int; }
     | OrderedListItem   { Content : Nitra.NSpan; Level : int; }
     | Hr {}
-    | FoldedBlock { Content : Paragraph*; }
-    | Blockquote  { Content : Paragraph*; }
+    | FoldedBlock { Content : Paragraph*; Header : Nitra.NSpan; }
+    | Blockquote  { Content : Paragraph*; Header : Nitra.NSpan; }
     | Moderator   { Content : Paragraph*; }
   }
 
@@ -48,8 +48,8 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content = PartContent.Location.Span; Level = UnorderedListItemPrefix.Length; }
     | OrderedListItem   { Content = PartContent.Location.Span; Level = OrderedListItemPrefix.Length;   }
     | Hr                {}
-    | Blockquote        { Content <- PartContents; }
-    | FoldedBlock       { Content <- PartContents; }
+    | Blockquote        { Content <- PartContents; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
+    | FoldedBlock       { Content <- PartContents; Header = Header.ContentSpan(); }
     | Moderator         { Content <- PartContents; }
   }
 

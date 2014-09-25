@@ -17,7 +17,8 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using System.Net.WebUtility;
-using System.Web.Util.HttpEncoder; // TODO: Перевести на это дело!
+//using System.Web.Util.HttpEncoder; 
+// TODO: Перевести на это дело!
 
 using SCG = System.Collections.Generic;
 
@@ -44,7 +45,18 @@ namespace RsdnMarkdown
       mutable prevLevel;
       mutable prevIsOrdered;
       mutable isListItem;
+      mutable nestingLevel = 0;
       
+      def indent(nestingLevel : int) : void
+      {
+        repeat (nestingLevel)
+          writer.Write("  ");
+      }
+      def close(tag : string) : void
+      {
+        indent(nestingLevel);
+        writer.WriteLine(tag);
+      }
       def tryCloseList() : void
       {
         when (!isListItem && prevLevel > 0)
@@ -54,21 +66,19 @@ namespace RsdnMarkdown
           while (listStack.Count > 0)
           {
             def isOrdered = listStack.Pop();
-            writer.WriteLine(if (isOrdered) "</ol>" else "</ul>");
+            close(if (isOrdered) "</ol>" else "</ul>");
           }
         }
-      }
-      def close(tag : string) : void
-      {
-        writer.WriteLine(tag);
       }
       def open(tag : string) : void
       {
         tryCloseList();
+        indent(nestingLevel);
         writer.Write(tag);
       }
       def openBlock(tag : string) : void
       {
+        indent(nestingLevel);
         tryCloseList();
         writer.WriteLine(tag);
       }
@@ -78,30 +88,47 @@ namespace RsdnMarkdown
         
         if (prevLevel > 0 && prevLevel == level && prevIsOrdered != isOrdered)
         {
+          indent(nestingLevel);
           // Списки на одном урочне, но с разным типом нумерации
           writer.WriteLine(if (prevIsOrdered) "<ol>" else "<ul>");
           _ = listStack.Pop();
           listStack.Push(isOrdered);
           prevIsOrdered = isOrdered;
-          writer.Write(if (isOrdered) "<ol>" else "<ul>");
+          indent(nestingLevel);
+          writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
         }
         else if (level < prevLevel)
         {
+          indent(nestingLevel);
           writer.WriteLine(if (prevIsOrdered) "</ol>" else "</ul>");
           prevIsOrdered = listStack.Pop();
           prevLevel = listStack.Count;
         }
         else when (level > prevLevel)
         {
+          indent(nestingLevel);
           writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
           listStack.Push(isOrdered);
           prevLevel = listStack.Count;
         }
 
+        indent(nestingLevel + 1);
         writer.Write("<li>");
       }
-      def decls(paragraphs : DeclarationList[Paragraph])
+      def foldable(header : NSpan, declarations : Seq[Paragraph]) : void
       {
+        openBlock("<div class='foldable folded'>");
+        nestingLevel++;
+        open("<div class='block-name'>"); content(header); close("</div>");
+        openBlock("<div>");
+        decls(declarations);
+        close("</div>");
+        nestingLevel--;
+        close("</div>");
+      }
+      and decls(paragraphs : Seq[Paragraph])
+      {
+        nestingLevel++;
         foreach (paragraph in paragraphs)
         {
           isListItem = false;
@@ -118,8 +145,21 @@ namespace RsdnMarkdown
             | TagLine           as p => open("<div class='tagline'>");            content(p.Content);  close("</div>");
             | UnorderedListItem as p => openListItem(p.Level, false);             content(p.Content);  close("</li>");
             | OrderedListItem   as p => openListItem(p.Level, true);              content(p.Content);  close("</li>");
-            | Blockquote        as p => openBlock("<blockquote>");                decls(p.Content);    close("</blockquote>");
-            | FoldedBlock       as p => openBlock("<div class='foldable'>");      decls(p.Content);    close("</div>");
+            | Blockquote        as p => 
+              if (p.Header.IsEmpty)
+              {
+                openBlock("<blockquote>");
+                decls(p.Content);
+                close("</blockquote>");
+              }
+              else
+              {
+                def par = Paragraph.Blockquote(p.Parent, p.Span);
+                par.Initialize(p.Content, NSpan());
+                foldable(p.Header, [par]);
+              }
+              
+            | FoldedBlock       as p => foldable(p.Header, p.Content);
             | Moderator         as p => openBlock("<div class='moderator'>");     decls(p.Content);    close("</div>");
             | Hr                     => openBlock("<hr>");
             | _ => assert2(false, "No implementation for " + paragraph.GetType().Name);
@@ -127,6 +167,7 @@ namespace RsdnMarkdown
           
           assert2(prevLevel >= 0);
         }
+        nestingLevel--;
       }
 
       def source          = SourceSnapshot(block);
@@ -289,7 +330,7 @@ namespace RsdnMarkdown
       def urlSource = url.GetText().Trim();
       def urlSource = if (GetUriScheme(urlSource).Length == 0) "http://" + urlSource else urlSource;
 
-      if (imgOpt.IsSome)
+      if (imgOpt.HasValue)
       {
         when (imgOpt.Location.GetText() == "+!")
         {
@@ -299,9 +340,9 @@ namespace RsdnMarkdown
         writer.Write(<#<img src="#>);
         HtmlAttributeEncode(writer, urlSource);
         writer.Write("\" ");
-        when (urlTextOpt.IsSome)
+        when (urlTextOpt.HasValue)
         {
-          def urlText = HtmlAttributeEncode(urlTextOpt.Item.Item1.GetText());
+          def urlText = HtmlAttributeEncode(urlTextOpt.Value.Item1.GetText());
           writer.Write($<#title="$urlText" alt="$urlText" #>);
         }
         writer.Write(">");
@@ -311,7 +352,7 @@ namespace RsdnMarkdown
         writer.Write(<#<a href="#>);
         HtmlAttributeEncode(writer, urlSource);
         writer.Write(<#">#>);
-        def urlText = HtmlEncode(if (urlTextOpt.IsSome) urlTextOpt.Item.Item1.GetText() else url.GetText());
+        def urlText = HtmlEncode(if (urlTextOpt.HasValue) urlTextOpt.Value.Item1.GetText() else url.GetText());
         writer.Write(urlText);
         writer.Write(<#</a>#>);
       }

@@ -1,10 +1,15 @@
 ﻿<!DOCTYPE html>
 <html>
 <head>
-  <link href="http://rsdn.ru/bundles/css/site" rel="stylesheet" />
-  <title>Pretty Print</title>
+  <title>Rsdn.Format</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-  <style type="text/css">
+  <link rel="stylesheet" href="Scripts/rsdn.format.css">
+  <script src="http://rsdn.ru/Scripts/jquery-2.1.1.js"></script>
+  <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/styles/vs.min.css">
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/highlight.min.js"></script>
+  <script src="Scripts/rsdn.format.js"></script>
+  <!--<style type="text/css">
     .code {
       color: Black;
       font-weight: normal;
@@ -16,9 +21,11 @@
     .inline-quote {
       background: bisque;
     }
-  </style>
+  </style>-->
 </head>
 <body>
-  {content}
+  <div class="format">
+    {content}
+  </div>
 </body>
 </html>

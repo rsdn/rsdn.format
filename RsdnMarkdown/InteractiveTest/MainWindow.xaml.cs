@@ -20,6 +20,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 
 using Path = System.IO.Path;
+using System.Reflection;
 
 namespace InteractiveTest
 {
@@ -35,8 +36,8 @@ namespace InteractiveTest
 
     private void _text_TextChanged(object sender, TextChangedEventArgs e)
     {
-      var html = GetHtml();
-      _htmlViewer.NavigateToString(html);
+      //var filePath = MakeHtmlFile();
+      //_htmlViewer.Navigate(filePath);
     }
 
     private string GetHtml()
@@ -58,11 +59,17 @@ namespace InteractiveTest
 
     private void _openInBrowser_Click(object sender, RoutedEventArgs e)
     {
+      Process.Start(MakeHtmlFile());
+    }
+
+    private string MakeHtmlFile()
+    {
       var html = GetHtml();
-      var fileName = Path.GetTempFileName();
-      fileName = Path.ChangeExtension(fileName, "html");
-      File.WriteAllText(fileName, html, Encoding.UTF8);
-      Process.Start(fileName);
+      var fileName = "preview.html";
+      var path = Path.GetDirectoryName(new Uri(Assembly.GetExecutingAssembly().Location).LocalPath);
+      var htmlFilePath = Path.Combine(path, fileName);
+      File.WriteAllText(htmlFilePath, html, Encoding.UTF8);
+      return htmlFilePath;
     }
   }
 }

@@ -30,7 +30,10 @@
       ToHtml(tag : string, writer : TextWriter) : void = ProcessContent(tag, writer, this, Content);
     }
 
-    token Header = Ws !W !NewLine Header=(!NewLine Any)+;
+    token Header = Ws !W !NewLine Header=(!NewLine Any)+
+    {
+      ContentSpan() : NSpan = Header;
+    }
 
     [StartRule]
     syntax Start = Content* !Any;
