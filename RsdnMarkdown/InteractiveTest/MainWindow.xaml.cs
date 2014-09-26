@@ -49,7 +49,7 @@ namespace InteractiveTest
       foreach (var block in blocks)
       {
         var blockContent = Utils.ProcessQuotationBlock(block.Value);
-        sb.AppendLine("<tr><td><b>" + block.Key + "</b></td><td>" + blockContent + "</td></tr>");
+        sb.AppendLine("<tr><td><b>" + block.Key + "</b></td><td>\r\n" + blockContent + "</td></tr>\r\n");
       }
       sb.AppendLine("</table>");
 

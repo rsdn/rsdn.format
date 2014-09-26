@@ -52,9 +52,13 @@ namespace RsdnMarkdown
         repeat (nestingLevel)
           writer.Write("  ");
       }
-      def close(tag : string) : void
+      def closeBlock(tag : string) : void
       {
         indent(nestingLevel);
+        writer.WriteLine(tag);
+      }
+      def close(tag : string) : void
+      {
         writer.WriteLine(tag);
       }
       def tryCloseList() : void
@@ -66,7 +70,7 @@ namespace RsdnMarkdown
           while (listStack.Count > 0)
           {
             def isOrdered = listStack.Pop();
-            close(if (isOrdered) "</ol>" else "</ul>");
+            closeBlock(if (isOrdered) "</ol>" else "</ul>");
           }
         }
       }
@@ -78,8 +82,8 @@ namespace RsdnMarkdown
       }
       def openBlock(tag : string) : void
       {
-        indent(nestingLevel);
         tryCloseList();
+        indent(nestingLevel);
         writer.WriteLine(tag);
       }
       def openListItem(level : int, isOrdered : bool) : void
@@ -88,16 +92,20 @@ namespace RsdnMarkdown
         
         if (level < prevLevel)
         {
+          // Close opened lists
           for (mutable i = prevLevel; i > level; i--)
           {
             indent(nestingLevel);
             writer.WriteLine(if (prevIsOrdered) "</ol>" else "</ul>");
+            nestingLevel--;
             prevIsOrdered = listStack.Pop();
             prevLevel = listStack.Count;
           }
         }
         else when (level > prevLevel)
         {
+          // Open new nested list
+          nestingLevel++;
           indent(nestingLevel);
           writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
           listStack.Push(prevIsOrdered);
@@ -107,8 +115,8 @@ namespace RsdnMarkdown
 
         when (prevLevel > 0 && prevLevel == level && prevIsOrdered != isOrdered)
         {
+          // Lists has same level but  different oder. We should close previos list and open new one.
           indent(nestingLevel);
-          // Списки на одном урочне, но с разным типом нумерации
           writer.WriteLine(if (prevIsOrdered) "</ol>" else "</ul>");
           _ = listStack.Pop();
           listStack.Push(isOrdered);
@@ -127,9 +135,9 @@ namespace RsdnMarkdown
         open("<div class='block-name'>"); content(header); close("</div>");
         openBlock("<div>");
         decls(declarations);
-        close("</div>");
+        closeBlock("</div>");
         nestingLevel--;
-        close("</div>");
+        closeBlock("</div>");
       }
       and decls(paragraphs : Seq[Paragraph])
       {
@@ -155,7 +163,7 @@ namespace RsdnMarkdown
               {
                 openBlock("<blockquote>");
                 decls(p.Content);
-                close("</blockquote>");
+                closeBlock("</blockquote>");
               }
               else
               {
@@ -165,13 +173,15 @@ namespace RsdnMarkdown
               }
               
             | FoldedBlock       as p => foldable(p.Header, p.Content);
-            | Moderator         as p => openBlock("<div class='moderator'>");     decls(p.Content);    close("</div>");
-            | Hr                     => openBlock("<hr>");
+            | Moderator         as p => openBlock("<div class='moderator'>");     decls(p.Content);    closeBlock("</div>");
+            | Hr                     => writer.WriteLine(); indent(nestingLevel); writer.WriteLine("<hr>"); writer.WriteLine();
             | _ => assert2(false, "No implementation for " + paragraph.GetType().Name);
           }
           
           assert2(prevLevel >= 0);
         }
+        isListItem = false;
+        tryCloseList();
         nestingLevel--;
       }
 
