@@ -9,6 +9,8 @@ module RsdnFormat {
 		var format = $('.format');
 		// Add class for proper image handles styling
 		format.find('div img').parent().addClass('image');
+		format.find('div blockquote').parent().addClass('quote');
+		format.find('div .code').parent().addClass('code-box');
 
 		// Foldable blocks
 		format.find('.foldable .block-name').click(evt => {

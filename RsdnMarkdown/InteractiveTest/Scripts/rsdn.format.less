@@ -30,7 +30,6 @@
 			border-bottom-color: @colors-link-visited-underline;
 		}
 	}
-
 	/* Foldable structures*/
 	.block-name {
 		font-weight: bold;
@@ -71,6 +70,7 @@
 			display: none;
 		}
 	}
+
 	/* Image */
 	.image .block-name:before {
 		content: '\f03e';
@@ -110,16 +110,29 @@
 		}
 	}
 
+	.foldable.quote {
+		& .block-name:before {
+			content: '\f147  \f10d';
+		}
+
+		&.folded .block-name:before {
+			content: '\f196  \f10d';
+		}
+	}
+
 	/* Code */
 	.code {
 		white-space: pre;
 		background-color: @colors-tinted-bg-light;
 		font-family: Consolas, "Courier New", Courier, monospace;
 		border: 1px solid #D0D0D0 !important;
-		border-left-width: 4px !important;
-		margin: 4px 30px 4px 30px !important;
 		padding: 2px 10px;
 		overflow: visible;
+	}
+
+	div.code {
+		border-left-width: 4px !important;
+		margin: 4px 30px 4px 30px !important;
 
 		&:before {
 			display: block;
@@ -129,6 +142,20 @@
 			margin-left: -46px;
 			font: bold 16px Cochin,Georgia,"Times New Roman", serif;
 			color: #D0D0D0;
+		}
+	}
+
+	span.code {
+		display: inline;
+	}
+
+	div.foldable.code-box {
+		& .block-name:before {
+			content: '\f147  \f121';
+		}
+
+		&.folded .block-name:before {
+			content: '\f196  \f121';
 		}
 	}
 
@@ -203,8 +230,8 @@
 		margin: 4px;
 	}
 
-	/* Emoticons */
 	@emoticon-size: 15px;
+	/* Emoticons */
 	.emoticon {
 		display: inline-block;
 		width: @emoticon-size;

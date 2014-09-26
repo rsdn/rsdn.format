@@ -104,17 +104,25 @@
   margin-top: -2px;
   margin-bottom: 0;
 }
+.format .foldable.quote .block-name:before {
+  content: '\f147  \f10d';
+}
+.format .foldable.quote.folded .block-name:before {
+  content: '\f196  \f10d';
+}
 .format .code {
   white-space: pre;
   background-color: #efeff2;
   font-family: Consolas, "Courier New", Courier, monospace;
   border: 1px solid #D0D0D0 !important;
-  border-left-width: 4px !important;
-  margin: 4px 30px 4px 30px !important;
   padding: 2px 10px;
   overflow: visible;
 }
-.format .code:before {
+.format div.code {
+  border-left-width: 4px !important;
+  margin: 4px 30px 4px 30px !important;
+}
+.format div.code:before {
   display: block;
   height: 12px;
   margin-top: -4px;
@@ -122,6 +130,15 @@
   margin-left: -46px;
   font: bold 16px Cochin, Georgia, "Times New Roman", serif;
   color: #D0D0D0;
+}
+.format span.code {
+  display: inline;
+}
+.format div.foldable.code-box .block-name:before {
+  content: '\f147  \f121';
+}
+.format div.foldable.code-box.folded .block-name:before {
+  content: '\f196  \f121';
 }
 .format h1,
 .format h2,
