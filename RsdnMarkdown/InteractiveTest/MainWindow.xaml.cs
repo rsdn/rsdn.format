@@ -36,8 +36,8 @@ namespace InteractiveTest
 
     private void _text_TextChanged(object sender, TextChangedEventArgs e)
     {
-      //var filePath = MakeHtmlFile();
-      //_htmlViewer.Navigate(filePath);
+      var filePath = MakeHtmlFile();
+      _htmlViewer.Navigate(filePath);
     }
 
     private string GetHtml()

@@ -93,6 +93,12 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
+    <None Include="Scripts\rsdn.format.css.map">
+      <DependentUpon>rsdn.format.css</DependentUpon>
+    </None>
+    <None Include="Scripts\rsdn.format.js.map">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Scripts\rsdn.format.less">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -109,6 +115,13 @@
     <Content Include="Resources\HtmlTemplate.html" />
     <Content Include="Scripts\rsdn.format.css">
       <DependentUpon>rsdn.format.less</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Scripts\rsdn.format.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Scripts\rsdn.format.min.css">
+      <DependentUpon>rsdn.format.css</DependentUpon>
     </Content>
     <Content Include="Scripts\rsdn.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

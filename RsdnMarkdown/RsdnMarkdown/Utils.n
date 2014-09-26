@@ -155,8 +155,8 @@ namespace RsdnMarkdown
               else
               {
                 def par = Paragraph.Blockquote(p.Parent, p.Span);
-                par.Initialize(p.Content, NSpan());
-                foldable(p.Header, [par]);
+                par.Initialize(p.Content, NSpan()); // Создаем такую же цитату, но без заголовка...
+                foldable(p.Header, [par]); // ... и рекурсивно генерим для нее HTML.
               }
               
             | FoldedBlock       as p => foldable(p.Header, p.Content);
