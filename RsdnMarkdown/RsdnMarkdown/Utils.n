@@ -443,9 +443,9 @@ namespace RsdnMarkdown
           | "C++" | "c++" => "cpp"
           | txt           => txt
         };
-      writer.Write($<#<code class="code $lang">#>);
+      writer.Write($<#<span class="code $lang">#>);
       HtmlEncode(ast.GetText(code), writer);
-      writer.Write("</code>");
+      writer.Write("</span>");
     }
     
     internal ProcessAutoCorrect(writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
