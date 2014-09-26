@@ -90,7 +90,7 @@ namespace RsdnMarkdown
         {
           indent(nestingLevel);
           // Списки на одном урочне, но с разным типом нумерации
-          writer.WriteLine(if (prevIsOrdered) "<ol>" else "<ul>");
+          writer.WriteLine(if (prevIsOrdered) "</ol>" else "</ul>");
           _ = listStack.Pop();
           listStack.Push(isOrdered);
           prevIsOrdered = isOrdered;
@@ -110,6 +110,7 @@ namespace RsdnMarkdown
           writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
           listStack.Push(isOrdered);
           prevLevel = listStack.Count;
+          prevIsOrdered = isOrdered;
         }
 
         indent(nestingLevel + 1);
