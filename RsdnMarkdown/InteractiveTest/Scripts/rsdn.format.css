@@ -15,7 +15,6 @@
   /* Quotes */
   /* Code */
   /* Headers */
-  /* Lists */
   /* HR*/
   /* Other stuff */
   /* Emoticons */
@@ -171,25 +170,6 @@
   font-weight: lighter;
   margin-top: 2px;
   margin-bottom: 2px;
-}
-.format ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.format ul li {
-  padding-left: 16px;
-}
-.format ul li:before,
-.format ul ul ul ul li:before {
-  content: "• ";
-  color: #216184;
-}
-.format ul ul li:before {
-  content: "▪ ";
-}
-.format ul ul ul li:before {
-  content: "▫ ";
 }
 .format hr {
   display: block;
