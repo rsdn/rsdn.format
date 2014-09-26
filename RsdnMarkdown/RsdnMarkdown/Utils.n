@@ -158,6 +158,28 @@ namespace RsdnMarkdown
             | TagLine           as p => open("<div class='tagline'>");            content(p.Content);  close("</div>");
             | UnorderedListItem as p => openListItem(p.Level, false);             content(p.Content);  close("</li>");
             | OrderedListItem   as p => openListItem(p.Level, true);              content(p.Content);  close("</li>");
+            | CodeBlock         as p => 
+              if (p.Header.IsEmpty)
+              {
+                if (p.Lang.IsEmpty)
+                  openBlock("<div class='code'>");
+                else
+                {
+                  def lang = block.Substring(p.Lang.StartPos, p.Lang.Length);
+                  openBlock($"<div class='code $lang'>");
+                }
+                
+                def code = block.Substring(p.Code.StartPos, p.Code.Length);
+                writer.Write(code);
+                closeBlock("</div>");
+              }
+              else
+              {
+                def par = Paragraph.CodeBlock(p.Parent, p.Span);
+                par.Initialize(p.Code, NSpan(), p.Lang); // Создаем такую же цитату, но без заголовка...
+                foldable(p.Header, [par]); // ... и рекурсивно генерим для нее HTML.
+              }
+              
             | Blockquote        as p => 
               if (p.Header.IsEmpty)
               {
@@ -174,7 +196,7 @@ namespace RsdnMarkdown
               
             | FoldedBlock       as p => foldable(p.Header, p.Content);
             | Moderator         as p => openBlock("<div class='moderator'>");     decls(p.Content);    closeBlock("</div>");
-            | Hr                     => writer.WriteLine(); indent(nestingLevel); writer.WriteLine("<hr>"); writer.WriteLine();
+            | Hr                     => tryCloseList(); writer.WriteLine(); indent(nestingLevel); writer.WriteLine("<hr>"); writer.WriteLine();
             | _ => assert2(false, "No implementation for " + paragraph.GetType().Name);
           }
           

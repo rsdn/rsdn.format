@@ -45,13 +45,14 @@ namespace InteractiveTest
       var reader = new StringReader(_text.Text);
       var blocks = Utils.SplitQuotations(reader);
       var sb = new StringBuilder();
-      sb.AppendLine("<table border=\"1\" width=\"100%\">");
+      //sb.AppendLine("<table border=\"1\" width=\"100%\">");
       foreach (var block in blocks)
       {
         var blockContent = Utils.ProcessQuotationBlock(block.Value);
-        sb.AppendLine("<tr><td><b>" + block.Key + "</b></td><td>\r\n" + blockContent + "</td></tr>\r\n");
+        //sb.AppendLine("<tr><td><b>" + block.Key + "</b></td><td>\r\n" + blockContent + "</td></tr>\r\n");
+        sb.AppendLine(blockContent);
       }
-      sb.AppendLine("</table>");
+      //sb.AppendLine("</table>");
 
       var html = Properties.Resources.HtmlTemplate.Replace("{content}", sb.ToString()); ;
       return html;

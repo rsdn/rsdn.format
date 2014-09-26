@@ -63,6 +63,7 @@
       | UnorderedListItem = UnorderedListItemPrefix Ws    PartContent
       | OrderedListItem   = OrderedListItemPrefix   Ws    PartContent
       | Hr                = "---"                   WsOpt
+      | CodeBlock         = "{{" ContentSyntax.LanguageName "{" Header? WsOpt NewLine Code=(!"}}}" Any)* "}}}"
       | Blockquote        = "<\"" Header? WsOpt NewLine PartContent* Token WsOpt
         {
           regex Token = "\">";

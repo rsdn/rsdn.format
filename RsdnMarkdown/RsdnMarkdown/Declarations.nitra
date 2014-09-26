@@ -21,9 +21,10 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content : Nitra.NSpan; Level : int; }
     | OrderedListItem   { Content : Nitra.NSpan; Level : int; }
     | Hr {}
-    | FoldedBlock { Content : Paragraph*; Header : Nitra.NSpan; }
-    | Blockquote  { Content : Paragraph*; Header : Nitra.NSpan; }
-    | Moderator   { Content : Paragraph*; }
+    | CodeBlock         { Code    : Nitra.NSpan; Header : Nitra.NSpan; Lang   : Nitra.NSpan; }
+    | FoldedBlock       { Content : Paragraph*;  Header : Nitra.NSpan; }
+    | Blockquote        { Content : Paragraph*;  Header : Nitra.NSpan; }
+    | Moderator         { Content : Paragraph*; }
   }
 
   declare Root from ParagraphSyntax.Start { Paragraphs <- Contents; }
@@ -50,6 +51,7 @@ namespace RsdnMarkdown.Declarations
     | Hr                {}
     | Blockquote        { Content <- PartContents; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
     | FoldedBlock       { Content <- PartContents; Header = Header.ContentSpan(); }
+    | CodeBlock         { Code = Code; Lang = LanguageName; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
     | Moderator         { Content <- PartContents; }
   }
 
