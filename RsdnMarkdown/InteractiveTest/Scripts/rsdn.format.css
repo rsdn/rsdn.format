@@ -176,19 +176,20 @@
   padding: 0;
   margin: 0;
 }
-.format ul li {
-  padding-left: 16px;
-}
 .format ul li:before,
 .format ul ul ul ul li:before {
+  padding-left: 16px;
   content: "• ";
   color: #216184;
+  font-size: 1.3em;
 }
 .format ul ul li:before {
+  padding-left: 32px;
   content: "▪ ";
   font-size: 1.3em;
 }
 .format ul ul ul li:before {
+  padding-left: 48px;
   content: "▫ ";
   font-size: 1.3em;
 }

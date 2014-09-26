@@ -86,7 +86,26 @@ namespace RsdnMarkdown
       {
         isListItem = true;
         
-        if (prevLevel > 0 && prevLevel == level && prevIsOrdered != isOrdered)
+        if (level < prevLevel)
+        {
+          for (mutable i = prevLevel; i > level; i--)
+          {
+            indent(nestingLevel);
+            writer.WriteLine(if (prevIsOrdered) "</ol>" else "</ul>");
+            prevIsOrdered = listStack.Pop();
+            prevLevel = listStack.Count;
+          }
+        }
+        else when (level > prevLevel)
+        {
+          indent(nestingLevel);
+          writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
+          listStack.Push(prevIsOrdered);
+          prevLevel = listStack.Count;
+          prevIsOrdered = isOrdered;
+        }
+
+        when (prevLevel > 0 && prevLevel == level && prevIsOrdered != isOrdered)
         {
           indent(nestingLevel);
           // Списки на одном урочне, но с разным типом нумерации
@@ -97,22 +116,7 @@ namespace RsdnMarkdown
           indent(nestingLevel);
           writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
         }
-        else if (level < prevLevel)
-        {
-          indent(nestingLevel);
-          writer.WriteLine(if (prevIsOrdered) "</ol>" else "</ul>");
-          prevIsOrdered = listStack.Pop();
-          prevLevel = listStack.Count;
-        }
-        else when (level > prevLevel)
-        {
-          indent(nestingLevel);
-          writer.WriteLine(if (isOrdered) "<ol>" else "<ul>");
-          listStack.Push(isOrdered);
-          prevLevel = listStack.Count;
-          prevIsOrdered = isOrdered;
-        }
-
+        
         indent(nestingLevel + 1);
         writer.Write("<li>");
       }
