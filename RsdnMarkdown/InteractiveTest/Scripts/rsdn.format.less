@@ -30,6 +30,7 @@
 			border-bottom-color: @colors-link-visited-underline;
 		}
 	}
+
 	/* Foldable structures*/
 	.block-name {
 		font-weight: bold;
@@ -84,6 +85,7 @@
 			content: '\f196  \f03e';
 		}
 	}
+
 	/* Quotes */
 	blockquote {
 		background-color: @colors-note-bg;
@@ -107,6 +109,7 @@
 			margin-bottom: 0;
 		}
 	}
+
 	/* Code */
 	.code {
 		white-space: pre;
@@ -128,6 +131,7 @@
 			color: #D0D0D0;
 		}
 	}
+
 	/* Headers */
 	h1, h2, h3, h4, h5, h6 {
 		font-variant: small-caps;
@@ -228,8 +232,8 @@
 		margin: 4px;
 	}
 
-	@emoticon-size: 15px;
 	/* Emoticons */
+	@emoticon-size: 15px;
 	.emoticon {
 		display: inline-block;
 		width: @emoticon-size;
@@ -327,6 +331,27 @@
 		}
 		&.level-max .quota-prefix:after {
 			content: '>…>';
+		}
+	}
+
+	/* Table */
+	table {
+		border: 1px solid @colors-border;
+		border-spacing: 0;
+		tr {
+			&.even {
+				background-color: @colors-tinted-bg-light;
+			}
+			&:hover {
+				background-color: @colors-tinted-bg;
+			}
+		}
+		th {
+			color: white;
+			background-color: @colors-border;
+		}
+		th, td {
+			padding: 4px;
 		}
 	}
 }

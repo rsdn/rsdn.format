@@ -20,6 +20,7 @@
   /* Other stuff */
   /* Emoticons */
   /* Quotas */
+  /* Table */
 }
 .format a {
   color: #4682b4;
@@ -299,4 +300,21 @@
 .format .quota.level-max .quota-prefix:after {
   content: '>…>';
 }
-/*# sourceMappingURL=rsdn.format.css.map */
+.format table {
+  border: 1px solid #65a7cb;
+  border-spacing: 0;
+}
+.format table tr.even {
+  background-color: #efeff2;
+}
+.format table tr:hover {
+  background-color: #cfe5f0;
+}
+.format table th {
+  color: white;
+  background-color: #65a7cb;
+}
+.format table th,
+.format table td {
+  padding: 4px;
+}
