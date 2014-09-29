@@ -10,20 +10,20 @@ namespace RsdnMarkdown.Declarations
 
   declarations Paragraph
   {
-    | Plain             { Content : Nitra.NSpan; Eol : Nitra.NSpan; }
-    | H1                { Content : Nitra.NSpan; }
-    | H2                { Content : Nitra.NSpan; }
-    | H3                { Content : Nitra.NSpan; }
-    | H4                { Content : Nitra.NSpan; }
-    | H5                { Content : Nitra.NSpan; }
-    | H6                { Content : Nitra.NSpan; }
-    | TagLine           { Content : Nitra.NSpan; }
-    | UnorderedListItem { Content : Nitra.NSpan; Level : int; }
-    | OrderedListItem   { Content : Nitra.NSpan; Level : int; }
-    | Hr {}
-    | CodeBlock         { Code    : Nitra.NSpan; Header : Nitra.NSpan; Lang   : Nitra.NSpan; }
-    | FoldedBlock       { Content : Paragraph*;  Header : Nitra.NSpan; }
-    | Blockquote        { Content : Paragraph*;  Header : Nitra.NSpan; }
+    | Plain             { Content : NSpan; Eol : NSpan; }
+    | H1                { Content : NSpan; }
+    | H2                { Content : NSpan; }
+    | H3                { Content : NSpan; }
+    | H4                { Content : NSpan; }
+    | H5                { Content : NSpan; }
+    | H6                { Content : NSpan; }
+    | TagLine           { Content : NSpan; }
+    | UnorderedListItem { Content : NSpan; Level : int; }
+    | OrderedListItem   { Content : NSpan; Level : int; }
+    | Hr
+    | CodeBlock         { Code    : NSpan;       Header : NSpan; Lang   : NSpan; }
+    | FoldedBlock       { Content : Paragraph*;  Header : NSpan; }
+    | Blockquote        { Content : Paragraph*;  Header : NSpan; }
     | Moderator         { Content : Paragraph*; }
   }
 
