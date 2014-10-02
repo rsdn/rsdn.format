@@ -161,17 +161,18 @@ namespace RsdnMarkdown
             | CodeBlock         as p => 
               if (p.Header.IsEmpty)
               {
+                // Добавлять лишние переносы внутри блока кода нельзя!!! Они все отобразятся браузером.
                 if (p.Lang.IsEmpty)
-                  openBlock("<div class='code'>");
+                  open("<div class='code'>");
                 else
                 {
                   def lang = block.Substring(p.Lang.StartPos, p.Lang.Length);
-                  openBlock($"<div class='code $lang'>");
+                  open($"<div class='code $lang'>");
                 }
-                
+
                 def code = block.Substring(p.Code.StartPos, p.Code.Length);
                 writer.Write(code);
-                closeBlock("</div>");
+                close("</div>");
               }
               else
               {
@@ -179,7 +180,6 @@ namespace RsdnMarkdown
                 par.Initialize(p.Code, NSpan(), p.Lang); // Создаем такую же цитату, но без заголовка...
                 foldable(p.Header, [par]); // ... и рекурсивно генерим для нее HTML.
               }
-              
             | Blockquote        as p => 
               if (p.Header.IsEmpty)
               {
@@ -233,7 +233,7 @@ namespace RsdnMarkdown
     public GetPrefix(line : string) : string
     {
       mutable bingo;
-      
+
       for (mutable i = 0; i < line.Length; i++)
       {
         def ch = line[i];
@@ -260,7 +260,7 @@ namespace RsdnMarkdown
       
       ""
     }
-    
+
     public GetUriScheme(uri : string) : string
     {
       when (uri.StartsWith("http:", StringComparison.InvariantCultureIgnoreCase))
@@ -284,7 +284,7 @@ namespace RsdnMarkdown
       
       ""
     }
-    
+
     NormalizeBlocks(blocks : List[KeyValuePair[string, string]]) : void
     {
       mutable lastPrefix;
@@ -316,13 +316,13 @@ namespace RsdnMarkdown
         else
           lastPrefix = prefix;
       }
-      
+
       lastPrefix = null;
       def parts = List();
       for (mutable i = 0; i < blocks.Count; i++)
       {
         def prefix = blocks[i].Key;
-        
+
         for (mutable j = i + 1; j < blocks.Count; j++)
         {
           def nextPrefix = blocks[j].Key;
@@ -332,7 +332,7 @@ namespace RsdnMarkdown
           else
             break;
         }
-        
+
         when (parts.Count > 0)
         {
           blocks.RemoveRange(i + 1, parts.Count);
@@ -340,7 +340,7 @@ namespace RsdnMarkdown
           blocks[i] = KeyValuePair(prefix, string.Join(Environment.NewLine, parts));
           parts.Clear();
         }
-        
+
         lastPrefix = prefix;
       }
     }
@@ -464,6 +464,7 @@ namespace RsdnMarkdown
       writer.Write(<#<span class="inline-quote">#>);
       writer.Write(ch);
     }
+
     internal EndQuotes(writer : TextWriter, ch : char) : void
     {
       writer.Write(ch);
