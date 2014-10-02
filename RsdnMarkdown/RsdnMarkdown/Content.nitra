@@ -154,6 +154,12 @@ namespace RsdnMarkdown
 
           regex Img = '+'? '!';
         }
+
+      | AutoUri = Nitra.Web.Uri.GuessUri
+        {
+          override ToHtml { ProcessAutoUri(writer, this); }
+        }
+
       | Smile                                                                { override ToHtml = ProcessSmile(writer, this, Smile); }
       | InlineCode = "{{" LanguageName "{" Code=(!"}}}" !NewLine Any)* "}}}" { override ToHtml = ProcessCode(writer, this, LanguageName, Code); }
       | Dash = Ws Text="--" Ws                                               { override ToHtml = ProcessAutoCorrect(writer, this, Ws1, Text, Ws2); }

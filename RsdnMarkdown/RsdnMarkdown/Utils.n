@@ -361,7 +361,21 @@ namespace RsdnMarkdown
       writer.Write(tag);
       writer.Write(">");
     }
-    
+
+    internal ProcessAutoUri(writer : TextWriter, ast : Ast) : void
+    {
+      def url = ast.GetText();
+      def urlSource = url.TrimEnd('.', ',', ')');
+
+      ProcessUrl(writer, urlSource, urlSource);
+      
+      when (url.Length > urlSource.Length)
+      {
+        def suffix = url.Substring(urlSource.Length, url.Length - urlSource.Length);
+        HtmlEncode(suffix, writer);
+      }
+    }
+
     internal ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentSyntaxAst.UrlText, NSpan]], url : ContentSyntaxAst.Url) : void
     {
       def urlSource = url.GetText().Trim();
@@ -385,14 +399,17 @@ namespace RsdnMarkdown
         writer.Write(">");
       }
       else
-      {
-        writer.Write(<#<a href="#>);
-        HtmlAttributeEncode(writer, urlSource);
-        writer.Write(<#">#>);
-        def urlText = HtmlEncode(if (urlTextOpt.HasValue) urlTextOpt.Value.Item1.GetText() else url.GetText());
-        writer.Write(urlText);
-        writer.Write(<#</a>#>);
-      }
+        ProcessUrl(writer, urlSource, if (urlTextOpt.HasValue) urlTextOpt.Value.Item1.GetText() else url.GetText())
+    }
+    
+    ProcessUrl(writer : TextWriter, urlSource : string, displayText :string) : void
+    {
+      writer.Write(<#<a href="#>);
+      HtmlAttributeEncode(writer, urlSource);
+      writer.Write(<#">#>);
+      def urlText = HtmlEncode(displayText);
+      writer.Write(urlText);
+      writer.Write(<#</a>#>);
     }
 
     internal HtmlAttributeEncode(writer : TextWriter, str : string) : void

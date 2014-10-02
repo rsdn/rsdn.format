@@ -30,8 +30,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <StartProgram>G:\P\Nitra\Nitra.Visualizer\bin\Debug\Nitra.Visualizer.exe</StartProgram>
-    <WorkingDirectory>G:\P\Nitra\Nitra.Visualizer\bin\Debug\</WorkingDirectory>
+    <StartProgram>C:\Program Files (x86)\JetBrains\Nitra\Nitra.Visualizer.exe</StartProgram>
+    <WorkingDirectory>C:\Program Files (x86)\JetBrains\Nitra\</WorkingDirectory>
     <CmdArgs />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
@@ -94,6 +94,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.n" />
+    <Compile Include="Uri.nitra">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Utils.n">
       <SubType>Code</SubType>
     </Compile>

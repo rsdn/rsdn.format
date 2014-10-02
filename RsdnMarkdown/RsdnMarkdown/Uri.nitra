@@ -1,0 +1,119 @@
+﻿namespace Nitra.Web
+{
+  [ExplicitSpaces]
+  syntax module Uri
+  {
+    using PrettyPrint;
+    using Outline;
+    using TokenNames;
+    using StandardSpanClasses;
+    using Whitespaces;
+    using Identifiers;
+  
+    [StartRule]
+    syntax Start = s UriLine* !Any;
+    syntax UriLine = Uri s nl;
+
+    syntax GuessUri    = &UrlCommonPrefix Uri
+    {
+      syntax UrlCommonPrefix
+      {
+        | Prefix1 = Scheme "://"
+        | Prefix2 = Scheme ":" UserInfo "@"
+        | Prefix3 = Scheme ":" Host ":" Port
+      }
+    }
+    syntax Uri         = Scheme ':' HierPart ("?" Query)? ("#" Fragment)?;
+    syntax AbsoluteUri = Scheme ":" HierPart ("?" Query)?;
+    syntax RelativeRef = RelativePart ("?" Query)? ("#" Fragment)?;
+
+    syntax HierPart
+    {
+      | Authority = AuthorityStart Authority PathAbEmpty
+      | PathAbsolute
+      | PathRootless
+      | PathEmpty
+    }
+
+    syntax UriReference
+    {
+      | Uri
+      | RelativeRef
+    }
+
+    syntax RelativePart
+    {
+      | Authority = AuthorityStart Authority PathAbEmpty
+      | PathAbsolute
+      | PathNoscheme
+      | PathEmpty
+    }
+
+    regex UserInfo = (Unreserved | PctEncoded | SubDelims | ":")*;
+    syntax Authority = (UserInfo "@")? Host (":" Port)?;
+  
+    syntax Host
+    {
+      | [SpanClass(Number)] IPLiteral
+      | [SpanClass(Number)] IPv4address
+      | RegName = (!IPv4address) RegName
+        {
+          regex RegName  = (Unreserved | PctEncoded | SubDelims)*;
+        }
+    }
+
+    regex Port         = Digit*;
+
+    regex IPLiteral   = "[" (IPv6address | IPvFuture) "]"
+    {
+      regex IPvFuture   = ("v" | "V") Hexdig+ "." (Unreserved | SubDelims | ":")+;
+      regex IPv6address = H16Colon+ Ls32 | (H16 (":" H16)*)? "::" (H16Colon* Ls32 | H16)? | "::" IPv4address;
+      regex H16Colon    = H16 ":";
+      regex H16         = Hexdig+;
+      regex Ls32        = ( H16 ":" H16 ) | IPv4address;
+    }
+  
+    regex IPv4address = DecOctet "." DecOctet "." DecOctet "." DecOctet
+    {
+      [SpanClass(Number)]
+      regex DecOctet = Digit Digit Digit Digit | Digit Digit Digit | Digit Digit | Digit;
+    }
+
+    syntax Path
+    {
+      | PathAbEmpty    // begins with "/" or is empty
+      | PathAbsolute   // begins with "/" but not "//"
+      | PathNoscheme   // begins with a non-colon segment
+      | PathRootless   // begins with a segment
+      | PathEmpty      // zero characters
+    }
+
+    syntax PathAbEmpty  = (Separator  Segment)*;
+    syntax PathAbsolute =  Separator (SegmentNz   (Separator Segment)*)?;
+    syntax PathNoscheme =             SegmentNzNc (Separator Segment)*;
+    syntax PathRootless =             SegmentNz   (Separator Segment)*;
+
+    [SpanClass(Keyword)]
+    regex AuthorityStart = "//";
+    [SpanClass(Keyword)]
+    regex Separator     = "/";
+    regex PathEmpty     = Pchar?;
+    regex Segment       = Pchar*;
+    regex SegmentNz     = Pchar+;
+    regex SegmentNzNc   = (Unreserved | PctEncoded | SubDelims | "@")+; // non-zero-length segment without any colon ":"
+    regex Pchar         = Unreserved | PctEncoded | SubDelims | ":" | "@";
+    regex Query         = (Pchar | "/" | "?")*;
+    regex Fragment      = (Pchar | "/" | "?")*;
+    [SpanClass(Char)]
+    regex PctEncoded    = "%" Hexdig Hexdig;
+    regex Unreserved    = Alpha | Digit | "-" | "." | "_" | "~";
+    regex Reserved      = GenDelims | SubDelims;
+    regex GenDelims     = ":" | "/" | "?" | "#" | "[" | "]" | "@";
+    regex SubDelims     = "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "=";
+    [SpanClass(Keyword)]
+    regex Scheme        = Alpha (Alpha | Digit | "+" | "-" | ".")*;
+    regex Alpha         = LetterCharacter;
+    regex Digit         = ['0'..'9'];
+    regex Hexdig        = ['0'..'9', 'A'..'F', 'a'..'f'];
+  }
+}
