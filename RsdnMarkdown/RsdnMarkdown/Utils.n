@@ -26,12 +26,30 @@ namespace RsdnMarkdown
 {
   public module Utils
   {
-    public ProcessQuotationBlock(block : string) : string
+    public GetHtml(rsdnMarkdown : string) : string
+    {
+      def sb = StringBuilder();
+      def reader = StringReader(rsdnMarkdown);
+      def blocks = Utils.SplitQuotations(reader);
+      foreach (block in blocks)
+      {
+        def (prefix, level, text) = block;
+        def blockContent = ProcessQuotationBlock(prefix, level, text);
+        _ = sb.AppendLine(blockContent);
+      }
+      
+      sb.ToString()
+    }
+    
+    public ProcessQuotationBlock(prefix : string, level : int, block : string) : string
     {
       def parserHost  = ParserHost();
       def sb          = StringBuilder();
       def writer      = StringWriter(sb);
 
+      when (level > 0)
+        _ = sb.AppendLine($<#<div class="quota level$level">#>);
+        
       def content(contentSpan : NSpan)
       {
         def paragraph   = block.Substring(contentSpan.StartPos, contentSpan.Length);
@@ -79,12 +97,16 @@ namespace RsdnMarkdown
         tryCloseList();
         indent(nestingLevel);
         writer.Write(tag);
+        when (level > 0)
+          writer.Write(prefix);
       }
       def openBlock(tag : string) : void
       {
         tryCloseList();
         indent(nestingLevel);
         writer.WriteLine(tag);
+        when (level > 0)
+          writer.Write(prefix);
       }
       def openListItem(level : int, isOrdered : bool) : void
       {
@@ -213,24 +235,27 @@ namespace RsdnMarkdown
       def paragraphRoot   = declarationRoot.Content :> Declarations.Root;
       decls(paragraphRoot.Paragraphs);
 
+      when (level > 0)
+        _ = sb.AppendLine("</div>");
+          
       sb.ToString()
     }
 
-    public SplitQuotations(reader : TextReader) : List[KeyValuePair[string, string]]
+    public SplitQuotations(reader : TextReader) : List[string * int * string]
     {
       def blocks = List();
       mutable line;
       while ({ line = reader.ReadLine(); line != null })
       {
-        def prefix = GetPrefix(line);
-        blocks.Add(KeyValuePair(prefix, line.Substring(prefix.Length)));
+        def (prefix, level) = GetPrefix(line);
+        blocks.Add((prefix, level, line.Substring(prefix.Length)));
       }
 
       NormalizeBlocks(blocks);
       blocks
     }
     
-    public GetPrefix(line : string) : string
+    public GetPrefix(line : string) : string * int
     {
       mutable bingo;
 
@@ -239,7 +264,7 @@ namespace RsdnMarkdown
         def ch = line[i];
         when (char.IsLetter(ch) || ch == '_')
           continue;
-        
+        def start = i;
         for (; i < line.Length; i++)
         {
           def ch = line[i];
@@ -253,12 +278,12 @@ namespace RsdnMarkdown
         }
         
         if (bingo)
-          return line.Substring(0, i);
+          return (line.Substring(0, i), i - start);
         else
-          return "";
+          return ("", 0);
       }
       
-      ""
+      ("", 0)
     }
 
     public GetUriScheme(uri : string) : string
@@ -285,50 +310,52 @@ namespace RsdnMarkdown
       ""
     }
 
-    NormalizeBlocks(blocks : List[KeyValuePair[string, string]]) : void
+    NormalizeBlocks(blocks : List[string * int * string]) : void
     {
       mutable lastPrefix;
-      def nextPrefix(blocks : List[_], mutable i : int) : string
+      mutable lastLevel;
+      
+      def nextPrefix(blocks : List[_], mutable i : int) : string * int
       {
         for (i++; i < blocks.Count; i++)
         {
-          def prefix = blocks[i].Key;
-          when (prefix != "")
-            return prefix;
+          def (prefix, level, _) = blocks[i];
+          when (level > 0)
+            return (prefix, level);
         }
         
-        null
+        (null, 0)
       }
       
       for (mutable i = 0; i < blocks.Count; i++)
       {
-        def prefix = blocks[i].Key;
-        def text = blocks[i].Value;
+        def (prefix, level, text) = blocks[i];
         
         if (prefix == "" && string.IsNullOrWhiteSpace(text))
         {
-          def nextPrefix = nextPrefix(blocks, i);
-          when (nextPrefix == lastPrefix)
-          {
-            blocks[i] = KeyValuePair(lastPrefix, text);
-          }
+          def (nextPrefix, nextLevel) = nextPrefix(blocks, i);
+          when (nextPrefix == lastPrefix && nextLevel == lastLevel)
+            blocks[i] = (lastPrefix, lastLevel, text);
         }
         else
+        {
           lastPrefix = prefix;
+          lastLevel  = level;
+        }
       }
 
       lastPrefix = null;
       def parts = List();
       for (mutable i = 0; i < blocks.Count; i++)
       {
-        def prefix = blocks[i].Key;
+        def (prefix, level, _) = blocks[i];
 
         for (mutable j = i + 1; j < blocks.Count; j++)
         {
-          def nextPrefix = blocks[j].Key;
+          def (nextPrefix, nextLevel, nextText) = blocks[j];
 
-          if (prefix == nextPrefix)
-            parts.Add(blocks[j].Value);
+          if (prefix == nextPrefix && level == nextLevel)
+            parts.Add(nextText);
           else
             break;
         }
@@ -336,8 +363,9 @@ namespace RsdnMarkdown
         when (parts.Count > 0)
         {
           blocks.RemoveRange(i + 1, parts.Count);
-          parts.Insert(0, blocks[i].Value);
-          blocks[i] = KeyValuePair(prefix, string.Join(Environment.NewLine, parts));
+          def (_, _, text) = blocks[i];
+          parts.Insert(0, text);
+          blocks[i] = (prefix, level, string.Join(Environment.NewLine, parts));
           parts.Clear();
         }
 
