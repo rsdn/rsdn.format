@@ -66,7 +66,7 @@ namespace RsdnMarkdown
             _ = sb.AppendLine(ProcessQuotationBlock(x.Text));
             
           | Node as x when x.Level > 0 =>
-            _ = sb.AppendLine($<#<div class='reply-quota' data-prefix="AVK" data-level="$(x.Level)">#>);
+            _ = sb.AppendLine(<#<div class='reply-quota' data-prefix="AVK" data-level="1">#>);
             makeHtml(x.Children);
             _ = sb.AppendLine("</div>");
               
