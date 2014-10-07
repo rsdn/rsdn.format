@@ -1,0 +1,65 @@
+﻿using Nitra;
+using Nitra.Declarations;
+
+using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Imperative;
+using Nemerle.Text;
+using Nemerle.Utility;
+
+using RsdnMarkdown.Declarations;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Net;
+using System.Net.WebUtility;
+
+namespace RsdnMarkdown
+{
+  variant QuoteTree
+  {
+    | Leaf
+      {
+        Prefix : string;
+        Level  : int;
+        Text   : string;
+        
+        public override ToString() : string
+        {
+          Level + ": " + Prefix + (if (Level > 0) string('>', Level) else "") + Text
+        }
+      }
+      
+    | Node
+      {
+        public this() {}
+        public this(parent : Node) { Parent = parent; Level = parent.Level + 1; }
+
+        public Children : List[QuoteTree] = List();
+        public Level    : int;
+        public Parent   : Node;
+
+        public override ToString() : string
+        {
+          Level + ": " + "Children=" + Children.Count
+        }
+      }
+
+      [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+      Nested : List[QuoteTree]
+      {
+        get
+        {
+          match (this)
+          {
+            | Node as n => n.Children
+            | Leaf => List()
+          }
+        }
+      }
+  }
+}

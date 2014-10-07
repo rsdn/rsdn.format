@@ -1,0 +1,96 @@
+﻿=Header 1
+==Header 2
+===Header 3
+====Header 4
+=====Header 5
+======Header 6
+Paragraph with **bold**, //emphasis (possibly italic)//, --deleted--, Xvvsubscriptvv and X^^superscript text^^. На подчеркивание, думаю, стоит забить. Все равно, по факту, им никто не пользуется, а некий mess up со ссылками нафик не нужен.
+<+ Block name
+Foldable paragraph.
++>
+Ссылка: [[ RSDN.ru ]], [[ Not visited | some.site ]]
+
+Картинки:
+![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
+
+Inline - ![[ http://rsdn.ru/mag/cover/mag0302.jpg ]].
+
+![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]].
+
+Foldable
+
++![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
+
+<"
+Один классик сказал …
+">
+
+<" Цитата
+Один классик сказал …
+">
+
+{{C#{
+[HttpGet]
+public ActionResult AskTeam()
+{
+  return
+    View(
+			Account.IsAnonymous ? new AskTeamModel() : new AskTeamModel
+			{
+        Name = Account.DisplayName,
+        Email = Account.Email
+			});
+}
+}}}
+
+Inline code:  {{C#{ public ActionResult AskTeam() { return View(Account.IsAnonymous ? new AskTeamModel() : new AskTeamModel }}}
+
+Bullet list
+* Item 1.
+** Item 1.1
+** Item 1.2
+*** Item 1.2.1
+*** Item 1.2.2
+* Item 2.
+
+Numbered list
+# Item 1
+## Item 1.1
+### Item 1.1.3
+## Item 1.2
+# Item 2
+## Item 2.1
+
+Mixed list
+# Item 1.1
+** Item 1.2
+** Item 2.2
+*** Item 1.3
+*** Item 2.3
+# Item 2.1
+
+Horizontral rule
+---
+!!! Moderator message !!!
+@@@ Tagline string
+
+Emoticons (TBD): :):)):))):(;):-\:???::no::up::down::super::shuffle::wow::crash::user::maniac::xz::beer:
+
+BB>>>>Level 4 Quotation
+BB>>>>Level 4 Quotation ...
+AA>>>Level 3 Quotation
+BBL>>evel 2 Quotation
+AA>Level 1 Quotation
+Отевет на цитату.
+
+BB>>>>Level 4 Quotation
+AA>Level 1 Quotation
+Отевет на цитату.
+
+BB>>>>Level 4 Quotation
+Отевет на цитату.
+
+AA>Level 1 Quotation
+BB>>>>Level 4 Quotation
+Отевет на цитату.
+

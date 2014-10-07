@@ -31,25 +31,60 @@ namespace RsdnMarkdown
       def sb = StringBuilder();
       def reader = StringReader(rsdnMarkdown);
       def blocks = Utils.SplitQuotations(reader);
-      foreach (block in blocks)
+      
+      def makeQuoteTree(blocks : List[_], i : int, levelNode : QuoteTree.Node) : void
       {
-        def (prefix, level, text) = block;
-        def blockContent = ProcessQuotationBlock(prefix, level, text);
-        _ = sb.AppendLine(blockContent);
+        when (i < 0)
+          return;
+          
+        def (_, level, _) as content = blocks[i];
+        
+        if (level == levelNode.Level)
+        {
+          levelNode.Children.Insert(0, QuoteTree.Leaf(content));
+          makeQuoteTree(blocks, i - 1, levelNode); // продолжаем перебор
+        }
+        else if (level > levelNode.Level)
+        {
+          def subLevel = QuoteTree.Node(levelNode);
+          levelNode.Children.Insert(0, subLevel);
+          subLevel.Children.Insert(0, QuoteTree.Leaf(content));
+          makeQuoteTree(blocks, i - 1, subLevel); // входим в рекурсию
+        }
+        else // if (level < level.Level)
+          makeQuoteTree(blocks, i, levelNode.Parent); // выходим из рекурсии
       }
       
+      def root = QuoteTree.Node();
+      makeQuoteTree(blocks, blocks.Count - 1, root);
+      
+      def makeHtml(nodes : List[QuoteTree]) : void
+      {
+        foreach (node in nodes)
+        {
+          | Leaf as x => 
+            _ = sb.AppendLine(ProcessQuotationBlock(x.Text));
+            
+          | Node as x when x.Level > 0 =>
+            _ = sb.AppendLine($<#<div class='reply-quota' data-prefix="AVK" data-level="$(x.Level)">#>);
+            makeHtml(x.Children);
+            _ = sb.AppendLine("</div>");
+              
+          | Node as x => makeHtml(x.Children);
+        }
+      }
+      
+      makeHtml(root.Children);
+     
       sb.ToString()
     }
     
-    public ProcessQuotationBlock(prefix : string, level : int, block : string) : string
+    public ProcessQuotationBlock(block : string) : string
     {
       def parserHost  = ParserHost();
       def sb          = StringBuilder();
       def writer      = StringWriter(sb);
 
-      when (level > 0)
-        _ = sb.AppendLine($<#<div class="quota level$level">#>);
-        
       def content(contentSpan : NSpan)
       {
         def paragraph   = block.Substring(contentSpan.StartPos, contentSpan.Length);
@@ -97,16 +132,12 @@ namespace RsdnMarkdown
         tryCloseList();
         indent(nestingLevel);
         writer.Write(tag);
-        when (level > 0)
-          writer.Write(prefix);
       }
       def openBlock(tag : string) : void
       {
         tryCloseList();
         indent(nestingLevel);
         writer.WriteLine(tag);
-        when (level > 0)
-          writer.Write(prefix);
       }
       def openListItem(level : int, isOrdered : bool) : void
       {
@@ -234,10 +265,6 @@ namespace RsdnMarkdown
       def declarationRoot = parseResult.GetDeclarationRoot();
       def paragraphRoot   = declarationRoot.Content :> Declarations.Root;
       decls(paragraphRoot.Paragraphs);
-
-      when (level > 0)
-        _ = sb.AppendLine("</div>");
-          
       sb.ToString()
     }
 
@@ -248,7 +275,7 @@ namespace RsdnMarkdown
       while ({ line = reader.ReadLine(); line != null })
       {
         def (prefix, level) = GetPrefix(line);
-        blocks.Add((prefix, level, line.Substring(prefix.Length)));
+        blocks.Add((prefix, level, line.Substring(prefix.Length + level)));
       }
 
       NormalizeBlocks(blocks);
@@ -278,7 +305,7 @@ namespace RsdnMarkdown
         }
         
         if (bingo)
-          return (line.Substring(0, i), i - start);
+          return (line.Substring(0, start), i - start);
         else
           return ("", 0);
       }
