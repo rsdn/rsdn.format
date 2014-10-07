@@ -118,13 +118,13 @@ namespace RsdnMarkdown
       {
         when (!isListItem && prevLevel > 0)
         {
-          prevLevel = 0;
-          prevIsOrdered = false;
           while (listStack.Count > 0)
           {
-            def isOrdered = listStack.Pop();
-            closeBlock(if (isOrdered) "</ol>" else "</ul>");
+            closeBlock(if (prevIsOrdered) "</ol>" else "</ul>");
+            prevIsOrdered = listStack.Pop();
           }
+          prevLevel = 0;
+          prevIsOrdered = false;
         }
       }
       def open(tag : string) : void
