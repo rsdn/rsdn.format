@@ -20,7 +20,6 @@
       {
         | Prefix1 = Scheme "://"
         | Prefix2 = Scheme ":" UserInfo "@"
-        | Prefix3 = Scheme ":" Host ":" Port
       }
     }
     syntax Uri         = Scheme ':' HierPart ("?" Query)? ("#" Fragment)?;
