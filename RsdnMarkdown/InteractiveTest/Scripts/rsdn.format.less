@@ -354,74 +354,18 @@
 	}
 
 	/* New quotas */
-	@quota-level-step: 8px;
-
 	.reply-quota {
 		background-color: #ecfce8;
-		color: #c1e5b9; // level > 3
-		border: 1px solid #c1e5b9;
-		margin: 6px 0;
+		color: #137900;
+		border: 1px solid #137900;
 		padding: 4px;
-		margin-left: @quota-level-step * 16;
-		font-size: .7em;
-		&:before {
+		margin: 4px;
+		margin-left: 8px;
+		font-size: .95em;
+		&[data-prefix]:before {
 			display: block;
 			font-weight: bold;
 			content: attr(data-prefix) ':';
-		}
-		&[data-level='1'] {
-			color: #137900;
-			border-color: #137900;
-			margin-left: @quota-level-step * 1;
-			font-size: 1em;
-		}
-		&[data-level='2'] {
-			color: #74b967;
-			border-color: #74b967;
-			margin-left: @quota-level-step * 2;
-			font-size: 1em;
-		}
-		&[data-level='3'] {
-			color: #9fd095;
-			border-color: #9fd095;
-			margin-left: @quota-level-step * 3;
-			font-size: 1em;
-		}
-		&[data-level='4'] {
-			margin-left: @quota-level-step * 4;
-		}
-		&[data-level='5'] {
-			margin-left: @quota-level-step * 5;
-		}
-		&[data-level='6'] {
-			margin-left: @quota-level-step * 6;
-		}
-		&[data-level='7'] {
-			margin-left: @quota-level-step * 7;
-		}
-		&[data-level='8'] {
-			margin-left: @quota-level-step * 8;
-		}
-		&[data-level='9'] {
-			margin-left: @quota-level-step * 9;
-		}
-		&[data-level='10'] {
-			margin-left: @quota-level-step * 10;
-		}
-		&[data-level='11'] {
-			margin-left: @quota-level-step * 11;
-		}
-		&[data-level='12'] {
-			margin-left: @quota-level-step * 12;
-		}
-		&[data-level='13'] {
-			margin-left: @quota-level-step * 13;
-		}
-		&[data-level='14'] {
-			margin-left: @quota-level-step * 14;
-		}
-		&[data-level='15'] {
-			margin-left: @quota-level-step * 15;
 		}
 	}
 }
