@@ -60,15 +60,59 @@ namespace RsdnMarkdown
       
       def makeHtml(nodes : List[QuoteTree]) : void
       {
+        def split(elems : List[QuoteTree]) : Seq[string * List[QuoteTree]]
+        {
+          mutable allHasSamePrefix = true;
+          mutable prevPrefix = null;
+          elems.Reverse(); // TODO: надо дописать!!!
+          foreach (elem in elems)
+          {
+            | Leaf as x when prevPrefix == null     => prevPrefix = x.Prefix;
+            | Leaf as x when prevPrefix != x.Prefix => allHasSamePrefix = false; break;
+            | Node => ()
+          }
+          
+          when (allHasSamePrefix)
+          {
+            if (prevPrefix == null)
+              return [];
+            else
+              return [(prevPrefix, elems)];
+          }
+          
+          mutable result     = List();
+          mutable currList   = List();
+
+          foreach (elem in elems)
+          {
+            | Leaf as x when prevPrefix != x.Prefix =>
+              when (prevPrefix != null)
+                result.Add((prevPrefix, currList));
+              currList = List();
+              currList.Add(elem);
+              prevPrefix = x.Prefix;
+
+            | _ => currList.Add(elem);
+          }
+          
+          result.Add((prevPrefix, currList));
+          result
+        }
+        
         foreach (node in nodes)
         {
           | Leaf as x => 
             _ = sb.AppendLine(ProcessQuotationBlock(x.Text));
             
           | Node as x when x.Level > 0 =>
-            _ = sb.AppendLine(<#<div class='reply-quota' data-prefix="AVK" data-level="1">#>);
-            makeHtml(x.Children);
-            _ = sb.AppendLine("</div>");
+            def groups = split(x.Children);
+            
+            foreach((prefix, children) in groups)
+            {
+              _ = sb.AppendLine($<#<div class='reply-quota' data-prefix="$prefix">#>);
+              makeHtml(children);
+              _ = sb.AppendLine("</div>");
+            }
               
           | Node as x => makeHtml(x.Children);
         }
