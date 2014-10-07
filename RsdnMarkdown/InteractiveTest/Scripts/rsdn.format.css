@@ -20,6 +20,7 @@
   /* Emoticons */
   /* Quotas */
   /* Table */
+  /* New quotas */
 }
 .format a {
   color: #4682b4;
@@ -311,4 +312,72 @@
 .format table th,
 .format table td {
   padding: 4px;
+}
+.format .reply-quota {
+  background-color: #ecfce8;
+  color: #c1e5b9;
+  border: 1px solid #c1e5b9;
+  margin: 6px 0;
+  padding: 4px;
+  margin-left: 128px;
+  font-size: .7em;
+}
+.format .reply-quota:before {
+  display: block;
+  font-weight: bold;
+  content: attr(data-prefix) ':';
+}
+.format .reply-quota[data-level='1'] {
+  color: #137900;
+  border-color: #137900;
+  margin-left: 8px;
+  font-size: 1em;
+}
+.format .reply-quota[data-level='2'] {
+  color: #74b967;
+  border-color: #74b967;
+  margin-left: 16px;
+  font-size: 1em;
+}
+.format .reply-quota[data-level='3'] {
+  color: #9fd095;
+  border-color: #9fd095;
+  margin-left: 24px;
+  font-size: 1em;
+}
+.format .reply-quota[data-level='4'] {
+  margin-left: 32px;
+}
+.format .reply-quota[data-level='5'] {
+  margin-left: 40px;
+}
+.format .reply-quota[data-level='6'] {
+  margin-left: 48px;
+}
+.format .reply-quota[data-level='7'] {
+  margin-left: 56px;
+}
+.format .reply-quota[data-level='8'] {
+  margin-left: 64px;
+}
+.format .reply-quota[data-level='9'] {
+  margin-left: 72px;
+}
+.format .reply-quota[data-level='10'] {
+  margin-left: 80px;
+}
+.format .reply-quota[data-level='11'] {
+  margin-left: 88px;
+}
+.format .reply-quota[data-level='12'] {
+  margin-left: 96px;
+}
+.format .reply-quota[data-level='13'] {
+  margin-left: 104px;
+}
+.format .reply-quota[data-level='14'] {
+  margin-left: 112px;
+}
+.format .reply-quota[data-level='15'] {
+  margin-left: 120px;
 }
