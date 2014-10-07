@@ -53,15 +53,15 @@
     [StartRule]
     syntax Part
     {
-      | H1                = "="                     Ws    PartContent
-      | H2                = "=="                    Ws    PartContent
-      | H3                = "==="                   Ws    PartContent
-      | H4                = "===="                  Ws    PartContent
-      | H5                = "====="                 Ws    PartContent
-      | H6                = "======"                Ws    PartContent
-      | TagLine           = "@@@"                   Ws    PartContent
-      | UnorderedListItem = UnorderedListItemPrefix Ws    PartContent
-      | OrderedListItem   = OrderedListItemPrefix   Ws    PartContent
+      | H1                = "="                     !"=" WsOpt    PartContent
+      | H2                = "=="                    !"=" WsOpt    PartContent
+      | H3                = "==="                   !"=" WsOpt    PartContent
+      | H4                = "===="                  !"=" WsOpt    PartContent
+      | H5                = "====="                 !"=" WsOpt    PartContent
+      | H6                = "======"                !"=" WsOpt    PartContent
+      | TagLine           = "@@@"                   !"@" WsOpt    PartContent
+      | UnorderedListItem = UnorderedListItemPrefix      WsOpt    PartContent
+      | OrderedListItem   = OrderedListItemPrefix        WsOpt    PartContent
       | Hr                = "---"                   WsOpt
       | CodeBlock         = "{{" ContentSyntax.LanguageName "{" Header? WsOpt NewLine Code=(!"}}}" Any)* "}}}"
       | Blockquote        = "<\"" Header? WsOpt NewLine PartContent* Token WsOpt
