@@ -31,6 +31,7 @@ namespace RsdnMarkdown
       def sb = StringBuilder();
       def reader = StringReader(rsdnMarkdown);
       def blocks = Utils.SplitQuotations(reader);
+      def context = Context();
       
       def makeQuoteTree(blocks : List[_], i : int, levelNode : QuoteTree.Node) : void
       {
@@ -64,12 +65,14 @@ namespace RsdnMarkdown
         {
           mutable allHasSamePrefix = true;
           mutable prevPrefix = null;
-          elems.Reverse(); // TODO: надо дописать!!!
-          foreach (elem in elems)
+          def reversElems = elems.ToArray();
+          Array.Reverse(reversElems);
+          
+          foreach (elem in reversElems)
           {
             | Leaf as x when prevPrefix == null     => prevPrefix = x.Prefix;
             | Leaf as x when prevPrefix != x.Prefix => allHasSamePrefix = false; break;
-            | Node => ()
+            | Leaf | Node => ()
           }
           
           when (allHasSamePrefix)
@@ -83,7 +86,7 @@ namespace RsdnMarkdown
           mutable result     = List();
           mutable currList   = List();
 
-          foreach (elem in elems)
+          foreach (elem in reversElems)
           {
             | Leaf as x when prevPrefix != x.Prefix =>
               when (prevPrefix != null)
@@ -102,7 +105,8 @@ namespace RsdnMarkdown
         foreach (node in nodes)
         {
           | Leaf as x => 
-            _ = sb.AppendLine(ProcessQuotationBlock(x.Text));
+            context.InQuotation = x.Level > 0;
+            _ = sb.AppendLine(ProcessQuotationBlock(context, x.Text));
             
           | Node as x when x.Level > 0 =>
             def groups = split(x.Children);
@@ -123,7 +127,7 @@ namespace RsdnMarkdown
       sb.ToString()
     }
     
-    public ProcessQuotationBlock(block : string) : string
+    public ProcessQuotationBlock(context : Context, block : string) : string
     {
       def parserHost  = ParserHost();
       def sb          = StringBuilder();
@@ -135,7 +139,7 @@ namespace RsdnMarkdown
         def source      = SingleLineSourceSnapshot(paragraph);
         def parseResult = ContentSyntax.Start(source, parserHost);
         def ast         = ContentSyntaxAst.Start.Create(parseResult);
-        ast.ToHtml(writer);
+        ast.ToHtml(context, writer);
       }
       
       def listStack = SCG.Stack();
@@ -318,15 +322,78 @@ namespace RsdnMarkdown
       mutable line;
       while ({ line = reader.ReadLine(); line != null })
       {
-        def (prefix, level) = GetPrefix(line);
+        def (prefix, level) = GetQuotePrefix(line);
         blocks.Add((prefix, level, line.Substring(prefix.Length + level)));
       }
 
-      NormalizeBlocks(blocks);
+      def normalizeBlocks(blocks : List[string * int * string]) : void
+      {
+        mutable lastPrefix;
+        mutable lastLevel;
+      
+        def nextPrefix(blocks : List[_], mutable i : int) : string * int
+        {
+          for (i++; i < blocks.Count; i++)
+          {
+            def (prefix, level, _) = blocks[i];
+            when (level > 0)
+              return (prefix, level);
+          }
+        
+          (null, 0)
+        }
+      
+        for (mutable i = 0; i < blocks.Count; i++)
+        {
+          def (prefix, level, text) = blocks[i];
+        
+          if (prefix == "" && string.IsNullOrWhiteSpace(text))
+          {
+            def (nextPrefix, nextLevel) = nextPrefix(blocks, i);
+            when (nextPrefix == lastPrefix && nextLevel == lastLevel)
+              blocks[i] = (lastPrefix, lastLevel, text);
+          }
+          else
+          {
+            lastPrefix = prefix;
+            lastLevel  = level;
+          }
+        }
+
+        lastPrefix = null;
+        def parts = List();
+        for (mutable i = 0; i < blocks.Count; i++)
+        {
+          def (prefix, level, _) = blocks[i];
+
+          for (mutable j = i + 1; j < blocks.Count; j++)
+          {
+            def (nextPrefix, nextLevel, nextText) = blocks[j];
+
+            if (prefix == nextPrefix && level == nextLevel)
+              parts.Add(nextText);
+            else
+              break;
+          }
+
+          when (parts.Count > 0)
+          {
+            blocks.RemoveRange(i + 1, parts.Count);
+            def (_, _, text) = blocks[i];
+            parts.Insert(0, text);
+            blocks[i] = (prefix, level, string.Join(Environment.NewLine, parts));
+            parts.Clear();
+          }
+
+          lastPrefix = prefix;
+        }
+      }
+      
+      normalizeBlocks(blocks);
       blocks
     }
     
-    public GetPrefix(line : string) : string * int
+    public GetQuotePrefix(line : string) : string * int
     {
       mutable bingo;
 
@@ -355,236 +422,6 @@ namespace RsdnMarkdown
       }
       
       ("", 0)
-    }
-
-    public GetUriScheme(uri : string) : string
-    {
-      when (uri.StartsWith("http:", StringComparison.InvariantCultureIgnoreCase))
-        return "http";
-      when (uri.StartsWith("https:", StringComparison.InvariantCultureIgnoreCase))
-        return "https";
-      
-      for (mutable i = 0; i < uri.Length; i++)
-      {
-        def ch = uri[i];
-        when (char.IsLetter(ch))
-          continue;
-        
-        i++;
-        
-        when (i < uri.Length && uri[i] == ':')
-          return uri.Substring(0, i - 1);
-        
-        return "";
-      }
-      
-      ""
-    }
-
-    NormalizeBlocks(blocks : List[string * int * string]) : void
-    {
-      mutable lastPrefix;
-      mutable lastLevel;
-      
-      def nextPrefix(blocks : List[_], mutable i : int) : string * int
-      {
-        for (i++; i < blocks.Count; i++)
-        {
-          def (prefix, level, _) = blocks[i];
-          when (level > 0)
-            return (prefix, level);
-        }
-        
-        (null, 0)
-      }
-      
-      for (mutable i = 0; i < blocks.Count; i++)
-      {
-        def (prefix, level, text) = blocks[i];
-        
-        if (prefix == "" && string.IsNullOrWhiteSpace(text))
-        {
-          def (nextPrefix, nextLevel) = nextPrefix(blocks, i);
-          when (nextPrefix == lastPrefix && nextLevel == lastLevel)
-            blocks[i] = (lastPrefix, lastLevel, text);
-        }
-        else
-        {
-          lastPrefix = prefix;
-          lastLevel  = level;
-        }
-      }
-
-      lastPrefix = null;
-      def parts = List();
-      for (mutable i = 0; i < blocks.Count; i++)
-      {
-        def (prefix, level, _) = blocks[i];
-
-        for (mutable j = i + 1; j < blocks.Count; j++)
-        {
-          def (nextPrefix, nextLevel, nextText) = blocks[j];
-
-          if (prefix == nextPrefix && level == nextLevel)
-            parts.Add(nextText);
-          else
-            break;
-        }
-
-        when (parts.Count > 0)
-        {
-          blocks.RemoveRange(i + 1, parts.Count);
-          def (_, _, text) = blocks[i];
-          parts.Insert(0, text);
-          blocks[i] = (prefix, level, string.Join(Environment.NewLine, parts));
-          parts.Clear();
-        }
-
-        lastPrefix = prefix;
-      }
-    }
-    
-    internal ProcessContent(writer : TextWriter, ast : Ast, span : NSpan) : void
-    {
-      def str = ast.GetText(span);
-      HtmlEncode(str, writer);
-    }
-
-    internal ProcessContent(tag : string, writer : TextWriter, ast : Ast, span : NSpan) : void
-    {
-      writer.Write("<");
-      writer.Write(tag);
-      writer.Write(">");
-      HtmlEncode(ast.GetText(span), writer);
-      writer.Write("</");
-      writer.Write(tag);
-      writer.Write(">");
-    }
-
-    internal ProcessAutoUri(writer : TextWriter, ast : Ast) : void
-    {
-      def url = ast.GetText();
-      def urlSource = url.TrimEnd('.', ',', ')');
-
-      ProcessUrl(writer, urlSource, urlSource);
-      
-      when (url.Length > urlSource.Length)
-      {
-        def suffix = url.Substring(urlSource.Length, url.Length - urlSource.Length);
-        HtmlEncode(suffix, writer);
-      }
-    }
-
-    internal ProcessUri(writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentSyntaxAst.UrlText, NSpan]], url : ContentSyntaxAst.Url) : void
-    {
-      def urlSource = url.GetText().Trim();
-      def urlSource = if (GetUriScheme(urlSource).Length == 0) "http://" + urlSource else urlSource;
-
-      if (imgOpt.HasValue)
-      {
-        when (imgOpt.Location.GetText() == "+!")
-        {
-          // Вот здесь нужно сгенерировать хтмл скрывающегося блока
-          // class='foldable'
-        }
-        writer.Write(<#<img src="#>);
-        HtmlAttributeEncode(writer, urlSource);
-        writer.Write("\" ");
-        when (urlTextOpt.HasValue)
-        {
-          def urlText = HtmlAttributeEncode(urlTextOpt.Value.Item1.GetText());
-          writer.Write($<#title="$urlText" alt="$urlText" #>);
-        }
-        writer.Write(">");
-      }
-      else
-        ProcessUrl(writer, urlSource, if (urlTextOpt.HasValue) urlTextOpt.Value.Item1.GetText() else url.GetText())
-    }
-    
-    ProcessUrl(writer : TextWriter, urlSource : string, displayText :string) : void
-    {
-      writer.Write(<#<a href="#>);
-      HtmlAttributeEncode(writer, urlSource);
-      writer.Write(<#">#>);
-      def urlText = HtmlEncode(displayText);
-      writer.Write(urlText);
-      writer.Write(<#</a>#>);
-    }
-
-    internal HtmlAttributeEncode(writer : TextWriter, str : string) : void
-    {
-      writer.Write(HtmlAttributeEncode(str));
-    }
-    
-    internal HtmlAttributeEncode(str : string) : string
-    {
-      str.Replace("\"", "&quot;")
-    }
-    
-    internal ProcessSmile(writer : TextWriter, ast : Ast, span : NSpan) : void
-    {
-      match (ast.GetText(span))
-      {
-        | <#:)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smile.gif">#>);
-        | <#:))#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/biggrin.gif">#>);
-        | <#:)))#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/lol.gif">#>);
-        | <#:(#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/frown.gif">#>);
-        | <#;)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/wink.gif">#>);
-        | <#:-\#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smirk.gif">#>);
-        | <#:???:#>     => writer.Write(<#<img border="0" width="15" height="22" src="http://rsdn.ru/Forum/Images/confused.gif">#>);
-        | <#:no:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/no.gif">#>);
-        | <#:up:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/sup.gif">#>);
-        | <#:down:#>    => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/down.gif">#>);
-        | <#:super:#>   => writer.Write(<#<img border="0" width="26" height="28" src="http://rsdn.ru/Forum/Images/super.gif">#>);
-        | <#:shuffle:#> => writer.Write(<#<img border="0" width="15" height="20" src="http://rsdn.ru/Forum/Images/shuffle.gif">#>);
-        | <#:wow:#>     => writer.Write(<#<img border="0" width="19" height="19" src="http://rsdn.ru/Forum/Images/wow.gif">#>);
-        | <#:crash:#>   => writer.Write(<#<img border="0" width="30" height="30" src="http://rsdn.ru/Forum/Images/crash.gif">#>);
-        | <#:user:#>    => writer.Write(<#<img border="0" width="40" height="20" src="http://rsdn.ru/Forum/Images/user.gif">#>);
-        | <#:maniac:#>  => writer.Write(<#<img border="0" width="70" height="25" src="http://rsdn.ru/Forum/Images/maniac.gif">#>);
-        | <#:xz:#>      => writer.Write(<#<img border="0" width="37" height="15" src="http://rsdn.ru/Forum/Images/xz.gif">#>);
-        | <#:beer:#>    => writer.Write(<#<img border="0" width="57" height="16" src="http://rsdn.ru/Forum/Images/beer.gif">#>);
-        | text          => HtmlEncode(text, writer);
-      }
-    }
-    
-    // TODO: Сделать поддержку таблиц
-    
-    internal ProcessCode(writer : TextWriter, ast : Ast, languageName : NSpan, code : NSpan) : void
-    {
-      // TODO: Сделать версию для инлайн и отдельного блока кода.
-      def lang = 
-        match (ast.GetText(languageName))
-        {
-          | "C#" | "c#"   => "cs"
-          | "C++" | "c++" => "cpp"
-          | txt           => txt
-        };
-      writer.Write($<#<span class="code $lang">#>);
-      HtmlEncode(ast.GetText(code), writer);
-      writer.Write("</span>");
-    }
-    
-    internal ProcessAutoCorrect(writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
-    {
-      writer.Write(ast.GetText(ws1));
-      match (ast.GetText(text))
-      {
-        | "--" => writer.Write("–");
-        | str => HtmlEncode(str, writer);
-      }
-      writer.Write(ast.GetText(ws2));
-    }
-
-    internal BeginQuotes(writer : TextWriter, ch : char) : void
-    {
-      writer.Write(<#<span class="inline-quote">#>);
-      writer.Write(ch);
-    }
-
-    internal EndQuotes(writer : TextWriter, ch : char) : void
-    {
-      writer.Write(ch);
-      writer.Write(<#</span>#>);
     }
   }
 }

@@ -11,15 +11,17 @@ Foldable paragraph.
 Ссылка: [[ RSDN.ru ]], [[ Not visited | some.site ]]
 
 Картинки:
+![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
 ![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
-
-Inline - ![[ http://rsdn.ru/mag/cover/mag0302.jpg ]].
-
-![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]].
-
-Foldable
-
 +![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
++![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
+Картинка ![[ http://s.rimg.info/5962bb18d0aff8d7b1a22b492ef7b499.gif ]] по месту.
+
+VD>![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
+VD>![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
+VD>+![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
+VD>+![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
+VD>Картинка ![[ http://s.rimg.info/5962bb18d0aff8d7b1a22b492ef7b499.gif ]] по месту.
 
 <"
 Один классик сказал …
@@ -80,15 +82,15 @@ Horizontral rule
 
 Emoticons (TBD): :):)):))):(;):-\:???::no::up::down::super::shuffle::wow::crash::user::maniac::xz::beer:
 
-BB>>>>Level 4 Quotation
-BB>>>>Level 4 Quotation ...
-AA>>>Level 3 Quotation
-BBL>>evel 2 Quotation
+BB>>>>* Level 4 Quotation
+BB>>>>* Level 4 Quotation ...
+AA>>># Level 3 Quotation
+BBL>>## Level 2 Quotation
 AA>Level 1 Quotation
 Отевет на цитату.
 
-BB>>>>Level 4 Quotation
-AA>Level 1 Quotation
+BB>>>>Level 4 Quotation 
+AA>Level 1 Quotation ![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
 Отевет на цитату.
 
 BB>>>>Level 4 Quotation

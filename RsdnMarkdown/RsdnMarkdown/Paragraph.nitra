@@ -27,7 +27,7 @@
 
     token PartContent = Content=(!NewLine Any)*
     {
-      ToHtml(tag : string, writer : TextWriter) : void = ProcessContent(tag, writer, this, Content);
+      ToHtml(context : Context, writer : TextWriter, tag : string) : void = ContentUtils.ProcessContent(context, writer, tag, this, Content);
     }
 
     token Header = Ws !W !NewLine Header=(!NewLine Any)+

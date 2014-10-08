@@ -1,0 +1,197 @@
+﻿using Nitra;
+using Nitra.Declarations;
+
+using Nemerle;
+using Nemerle.Collections;
+using Nemerle.Imperative;
+using Nemerle.Text;
+using Nemerle.Utility;
+
+using RsdnMarkdown.Declarations;
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Net;
+using System.Net.WebUtility;
+//using System.Web.Util.HttpEncoder; 
+// TODO: Перевести на это дело!
+
+using SCG = System.Collections.Generic;
+
+namespace RsdnMarkdown
+{
+  public module ContentUtils
+  {
+    public GetUriScheme(uri : string) : string
+    {
+      when (uri.StartsWith("http:", StringComparison.InvariantCultureIgnoreCase))
+        return "http";
+      when (uri.StartsWith("https:", StringComparison.InvariantCultureIgnoreCase))
+        return "https";
+      
+      for (mutable i = 0; i < uri.Length; i++)
+      {
+        def ch = uri[i];
+        when (char.IsLetter(ch))
+          continue;
+        
+        i++;
+        
+        when (i < uri.Length && uri[i] == ':')
+          return uri.Substring(0, i - 1);
+        
+        return "";
+      }
+      
+      ""
+    }
+    
+    // TODO: Сделать поддержку таблиц
+    
+    internal ProcessContent(_context : Context, writer : TextWriter, ast : Ast, span : NSpan) : void
+    {
+      def str = ast.GetText(span);
+      HtmlEncode(str, writer);
+    }
+
+    internal ProcessContent(_context : Context, writer : TextWriter, tag : string, ast : Ast, span : NSpan) : void
+    {
+      writer.Write("<");
+      writer.Write(tag);
+      writer.Write(">");
+      HtmlEncode(ast.GetText(span), writer);
+      writer.Write("</");
+      writer.Write(tag);
+      writer.Write(">");
+    }
+
+    internal ProcessAutoUri(context : Context, writer : TextWriter, ast : Ast) : void
+    {
+      def url = ast.GetText();
+      def urlSource = url.TrimEnd('.', ',', ')');
+
+      ProcessUrl(context, writer, urlSource, urlSource);
+      
+      when (url.Length > urlSource.Length)
+      {
+        def suffix = url.Substring(urlSource.Length, url.Length - urlSource.Length);
+        HtmlEncode(suffix, writer);
+      }
+    }
+
+    internal ProcessUri(context : Context, writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentSyntaxAst.UrlText, NSpan]], url : ContentSyntaxAst.Url) : void
+    {
+      def urlSource = url.GetText().Trim();
+      def urlSource = if (GetUriScheme(urlSource).Length == 0) "http://" + urlSource else urlSource;
+
+      if (imgOpt.HasValue && !context.InQuotation)
+      {
+        def isFolded = imgOpt.Location.GetText() == "+!";
+        def hasHeader = urlTextOpt.HasValue;
+        if (hasHeader || isFolded)
+        {
+          def urlText = if (hasHeader) HtmlAttributeEncode(urlTextOpt.Value.Item1.GetText()) else "Скрытая картинка";
+          def tagClass = if (isFolded) "foldable image folded" else "foldable image";
+          writer.Write(
+$<#<div class="$tagClass">
+		<div class="block-name">$urlText</div>
+		<img  title="$urlText" alt="$urlText" src="$(HtmlAttributeEncode(urlSource))">
+</div>#>);
+        }
+        else
+          writer.Write($<#<img src="$(HtmlAttributeEncode(urlSource))">#>);
+      }
+      else
+        ProcessUrl(context, writer, urlSource, if (urlTextOpt.HasValue) urlTextOpt.Value.Item1.GetText() else url.GetText())
+    }
+    
+    ProcessUrl(_context : Context, writer : TextWriter, urlSource : string, displayText :string) : void
+    {
+      writer.Write(<#<a href="#>);
+      HtmlAttributeEncode(writer, urlSource);
+      writer.Write(<#">#>);
+      def urlText = HtmlEncode(displayText);
+      writer.Write(urlText);
+      writer.Write(<#</a>#>);
+    }
+
+    internal ProcessSmile(_context : Context, writer : TextWriter, ast : Ast, span : NSpan) : void
+    {
+      match (ast.GetText(span))
+      {
+        | <#:)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smile.gif">#>);
+        | <#:))#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/biggrin.gif">#>);
+        | <#:)))#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/lol.gif">#>);
+        | <#:(#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/frown.gif">#>);
+        | <#;)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/wink.gif">#>);
+        | <#:-\#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smirk.gif">#>);
+        | <#:???:#>     => writer.Write(<#<img border="0" width="15" height="22" src="http://rsdn.ru/Forum/Images/confused.gif">#>);
+        | <#:no:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/no.gif">#>);
+        | <#:up:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/sup.gif">#>);
+        | <#:down:#>    => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/down.gif">#>);
+        | <#:super:#>   => writer.Write(<#<img border="0" width="26" height="28" src="http://rsdn.ru/Forum/Images/super.gif">#>);
+        | <#:shuffle:#> => writer.Write(<#<img border="0" width="15" height="20" src="http://rsdn.ru/Forum/Images/shuffle.gif">#>);
+        | <#:wow:#>     => writer.Write(<#<img border="0" width="19" height="19" src="http://rsdn.ru/Forum/Images/wow.gif">#>);
+        | <#:crash:#>   => writer.Write(<#<img border="0" width="30" height="30" src="http://rsdn.ru/Forum/Images/crash.gif">#>);
+        | <#:user:#>    => writer.Write(<#<img border="0" width="40" height="20" src="http://rsdn.ru/Forum/Images/user.gif">#>);
+        | <#:maniac:#>  => writer.Write(<#<img border="0" width="70" height="25" src="http://rsdn.ru/Forum/Images/maniac.gif">#>);
+        | <#:xz:#>      => writer.Write(<#<img border="0" width="37" height="15" src="http://rsdn.ru/Forum/Images/xz.gif">#>);
+        | <#:beer:#>    => writer.Write(<#<img border="0" width="57" height="16" src="http://rsdn.ru/Forum/Images/beer.gif">#>);
+        | text          => HtmlEncode(text, writer);
+      }
+    }
+    
+    internal ProcessCode(_context : Context, writer : TextWriter, ast : Ast, languageName : NSpan, code : NSpan) : void
+    {
+      // TODO: Сделать версию для инлайн и отдельного блока кода.
+      def lang = 
+        match (ast.GetText(languageName))
+        {
+          | "C#" | "c#"   => "cs"
+          | "C++" | "c++" => "cpp"
+          | txt           => txt
+        };
+      writer.Write($<#<span class="code $lang">#>);
+      HtmlEncode(ast.GetText(code), writer);
+      writer.Write("</span>");
+    }
+    
+    internal ProcessAutoCorrect(_context : Context, writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
+    {
+      writer.Write(ast.GetText(ws1));
+      match (ast.GetText(text))
+      {
+        | "--" => writer.Write("–");
+        | str => HtmlEncode(str, writer);
+      }
+      writer.Write(ast.GetText(ws2));
+    }
+
+    internal BeginQuotes(_context : Context, writer : TextWriter, ch : char) : void
+    {
+      writer.Write(<#<span class="inline-quote">#>);
+      writer.Write(ch);
+    }
+
+    internal EndQuotes(_context : Context, writer : TextWriter, ch : char) : void
+    {
+      writer.Write(ch);
+      writer.Write(<#</span>#>);
+    }
+
+    HtmlAttributeEncode(writer : TextWriter, str : string) : void
+    {
+      writer.Write(HtmlAttributeEncode(str));
+    }
+    
+    HtmlAttributeEncode(str : string) : string
+    {
+      str.Replace("\"", "&quot;")
+    }
+    
+  }
+}

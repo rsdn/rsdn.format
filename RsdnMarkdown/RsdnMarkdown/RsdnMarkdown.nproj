@@ -90,6 +90,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Content.nitra" />
+    <Compile Include="ContentUtils.n">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Context.n">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Declarations.nitra">
       <SubType>Code</SubType>
     </Compile>
