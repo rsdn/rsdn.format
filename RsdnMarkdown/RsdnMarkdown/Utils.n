@@ -28,9 +28,9 @@ namespace RsdnMarkdown
   {
     public GetHtml(rsdnMarkdown : string) : string
     {
-      def sb = StringBuilder();
-      def reader = StringReader(rsdnMarkdown);
-      def blocks = Utils.SplitQuotations(reader);
+      def sb      = StringBuilder();
+      def reader  = StringReader(rsdnMarkdown);
+      def blocks  = Utils.SplitQuotations(reader);
       def context = Context();
       
       def makeQuoteTree(blocks : List[_], i : int, levelNode : QuoteTree.Node) : void

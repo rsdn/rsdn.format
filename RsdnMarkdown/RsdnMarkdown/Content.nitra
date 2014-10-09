@@ -20,13 +20,7 @@ namespace RsdnMarkdown
     regex Esc                   = "\\";
     regex Smile = ":)" | ":))" | ":)))" | ":(" | ";)" | ":-\\" | ":???:" | SmileEx;
     regex SC = IdentifierStartCharacter;
-    regex SmileEx = ":" SC ":" 
-                  | ":" SC SC ":" 
-                  | ":" SC SC SC ":"
-                  | ":" SC SC SC SC ":"
-                  | ":" SC SC SC SC SC ":"
-                  | ":" SC SC SC SC SC SC ":"
-                  | ":" SC SC SC SC SC SC SC ":";
+    regex SmileEx = ":" SC{1,7} ":";
     regex NotAllowedUrlChar     = ']' | '|' | Ws ']' | NewLineCharacter;
     regex NotAllowedUrlTextChar = ']' | '|' | Ws '|' | NewLineCharacter;
     regex LanguageChar = IdentifierPartCharacters | "#" | "+";
