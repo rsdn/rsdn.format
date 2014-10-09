@@ -21,10 +21,25 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content : NSpan; Level : int; }
     | OrderedListItem   { Content : NSpan; Level : int; }
     | Hr
+    | Table             { Content : Table; }
     | CodeBlock         { Code    : NSpan;       Header : NSpan; Lang   : NSpan; }
     | FoldedBlock       { Content : Paragraph*;  Header : NSpan; }
     | Blockquote        { Content : Paragraph*;  Header : NSpan; }
     | Moderator         { Content : Paragraph*; }
+  }
+
+  declaration Table
+  {
+    Open  : NSpan;
+    Close : NSpan;
+    Parts : TablePart*;
+  }
+
+  declarations TablePart
+  {
+    | TablePart { Content : Table; }
+    | Separator { Content : NSpan; }
+    | Plain     { Content : NSpan; }
   }
 
   declare Root from ParagraphSyntax.Start { Paragraphs <- Contents; }
@@ -52,10 +67,20 @@ namespace RsdnMarkdown.Declarations
     | Blockquote        { Content <- PartContents; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
     | FoldedBlock       { Content <- PartContents; Header = Header.ContentSpan(); }
     | CodeBlock         { Code = Code; Lang = LanguageName; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
+    | Table             { Content <- Table; }
     | Moderator         { Content <- PartContents; }
   }
 
   declare Paragraph       from ParagraphSyntax.Part.Blockquote.PartContent;
   declare Paragraph       from ParagraphSyntax.Part.FoldedBlock.PartContent;
   declare Paragraph       from ParagraphSyntax.Part.Moderator.PartContent;
+
+  declare Table from ParagraphSyntax.Part.Table.Table { Open = Open; Close = Close; Parts <- TableParts; }
+
+  declare TablePart from ParagraphSyntax.Part.Table.TablePart
+  {
+    | TablePart { Content = Table.GetDeclaration(parent); }
+    | Separator { Content = Separator; }
+    | Plain     { Content = Text; }
+  }
 }

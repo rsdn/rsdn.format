@@ -64,6 +64,20 @@
       | OrderedListItem   = OrderedListItemPrefix        WsOpt    PartContent
       | Hr                = "---"                   WsOpt
       | CodeBlock         = "{{" ContentSyntax.LanguageName "{" Header? WsOpt NewLine Code=(!"}}}" Any)* "}}}"
+      | Table             = WsOpt Table WsOpt
+        {
+          regex Token = "|"? "|>";
+          regex Separator = "|";
+          syntax Table = Open="<|" TablePart* Close=Token ;
+          syntax TablePart
+          {
+            | Table
+            | Separator
+            | Plain = Text=(!PartSuffix Any)+  
+          }
+          syntax PartSuffix  { | Separator | Part | Table; }
+        }
+
       | Blockquote        = "<\"" Header? WsOpt NewLine PartContent* Token WsOpt
         {
           regex Token = "\">";

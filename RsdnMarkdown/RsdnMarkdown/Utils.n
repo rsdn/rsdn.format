@@ -175,15 +175,30 @@ namespace RsdnMarkdown
           prevIsOrdered = false;
         }
       }
+      def tryCloseTable() : void
+      {
+        when (!isListItem && prevLevel > 0)
+        {
+          while (listStack.Count > 0)
+          {
+            closeBlock(if (prevIsOrdered) "</ol>" else "</ul>");
+            prevIsOrdered = listStack.Pop();
+          }
+          prevLevel = 0;
+          prevIsOrdered = false;
+        }
+      }
       def open(tag : string) : void
       {
         tryCloseList();
+        tryCloseTable();
         indent(nestingLevel);
         writer.Write(tag);
       }
       def openBlock(tag : string) : void
       {
         tryCloseList();
+        tryCloseTable();
         indent(nestingLevel);
         writer.WriteLine(tag);
       }

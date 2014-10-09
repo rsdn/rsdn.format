@@ -75,7 +75,7 @@
     regex IPv4address = DecOctet "." DecOctet "." DecOctet "." DecOctet
     {
       [SpanClass(Number)]
-      regex DecOctet = Digit Digit Digit Digit | Digit Digit Digit | Digit Digit | Digit;
+      regex DecOctet = Digit{1, 4};
     }
 
     syntax Path
