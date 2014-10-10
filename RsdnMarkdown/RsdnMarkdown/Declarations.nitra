@@ -21,7 +21,7 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content : NSpan; Level : int; }
     | OrderedListItem   { Content : NSpan; Level : int; }
     | Hr
-    | Table             { Content : Table; }
+    | Table             { Content : RsdnMarkdown.Declarations.Table; }
     | CodeBlock         { Code    : NSpan;       Header : NSpan; Lang   : NSpan; }
     | FoldedBlock       { Content : Paragraph*;  Header : NSpan; }
     | Blockquote        { Content : Paragraph*;  Header : NSpan; }
@@ -37,7 +37,7 @@ namespace RsdnMarkdown.Declarations
 
   declarations TablePart
   {
-    | TablePart { Content : Table; }
+    | Table     { Content : RsdnMarkdown.Declarations.Table; }
     | Separator { Content : NSpan; }
     | Plain     { Content : NSpan; }
   }
@@ -79,7 +79,7 @@ namespace RsdnMarkdown.Declarations
 
   declare TablePart from ParagraphSyntax.Part.Table.TablePart
   {
-    | TablePart { Content = Table.GetDeclaration(parent); }
+    | Table     { Content = Table.GetDeclaration(parent); }
     | Separator { Content = Separator; }
     | Plain     { Content = Text; }
   }

@@ -147,6 +147,7 @@ namespace RsdnMarkdown
       mutable prevIsOrdered;
       mutable isListItem;
       mutable nestingLevel = 0;
+      def tableRows = List();
       
       def indent(nestingLevel : int) : void
       {
@@ -177,33 +178,46 @@ namespace RsdnMarkdown
       }
       def tryCloseTable() : void
       {
-        when (!isListItem && prevLevel > 0)
-        {
-          while (listStack.Count > 0)
-          {
-            closeBlock(if (prevIsOrdered) "</ol>" else "</ul>");
-            prevIsOrdered = listStack.Pop();
-          }
-          prevLevel = 0;
-          prevIsOrdered = false;
-        }
+        when (tableRows.Count == 0)
+          return;
+          
+        ProcessTable(context, writer, tableRows);
+          
+        closeBlock("</tbody>");
+        closeBlock("</table>");
+        tableRows.Clear();
       }
-      def open(tag : string) : void
+      def tryClose()
       {
         tryCloseList();
         tryCloseTable();
+      }
+      def open(tag : string) : void
+      {
+        tryClose();
         indent(nestingLevel);
         writer.Write(tag);
       }
       def openBlock(tag : string) : void
       {
-        tryCloseList();
-        tryCloseTable();
+        tryClose();
         indent(nestingLevel);
         writer.WriteLine(tag);
       }
+      def onTable(table : Table) : void
+      {
+        when (tableRows.Count == 0)
+        {
+          // началась таблица
+          openBlock("<table>");
+          openBlock("<tbody>");
+        }
+        
+        tableRows.Add(table);
+      }
       def openListItem(level : int, isOrdered : bool) : void
       {
+        tryCloseTable();
         isListItem = true;
         
         if (level < prevLevel)
@@ -274,6 +288,7 @@ namespace RsdnMarkdown
             | TagLine           as p => open("<div class='tagline'>");            content(p.Content);  close("</div>");
             | UnorderedListItem as p => openListItem(p.Level, false);             content(p.Content);  close("</li>");
             | OrderedListItem   as p => openListItem(p.Level, true);              content(p.Content);  close("</li>");
+            | Table             as p => onTable(p.Content)
             | CodeBlock         as p => 
               if (p.Header.IsEmpty)
               {
@@ -312,14 +327,14 @@ namespace RsdnMarkdown
               
             | FoldedBlock       as p => foldable(p.Header, p.Content);
             | Moderator         as p => openBlock("<div class='moderator'>");     decls(p.Content);    closeBlock("</div>");
-            | Hr                     => tryCloseList(); writer.WriteLine(); indent(nestingLevel); writer.WriteLine("<hr>"); writer.WriteLine();
+            | Hr                     => tryClose(); writer.WriteLine(); indent(nestingLevel); writer.WriteLine("<hr>"); writer.WriteLine();
             | _ => assert2(false, "No implementation for " + paragraph.GetType().Name);
           }
           
           assert2(prevLevel >= 0);
         }
         isListItem = false;
-        tryCloseList();
+        tryClose();
         nestingLevel--;
       }
 
@@ -331,6 +346,27 @@ namespace RsdnMarkdown
       sb.ToString()
     }
 
+    public ProcessTable(context : Context, writer : StringWriter, tables : List[Table]) : void
+    {
+      def result = List();
+      mutable curr = [];
+      
+      foreach (table in tables)
+      {
+        if (curr == null)
+        {
+          curr ::= table;
+          continue;
+        }
+        else if (curr.Head.Close == "||>")
+          curr ::= table;
+        else
+          result.Add(table);
+          
+        
+      }
+    }
+    
     public SplitQuotations(reader : TextReader) : List[string * int * string]
     {
       def blocks = List();
