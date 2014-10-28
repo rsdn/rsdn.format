@@ -68,14 +68,15 @@
         {
           regex Token = "|"? "|>";
           regex Separator = "|";
+          regex SeparatorGuard = "|"? ">";
           syntax Table = Open="<|" TablePart* Close=Token ;
           syntax TablePart
           {
             | Table
-            | Separator
-            | Plain = Text=(!PartSuffix Any)+  
+            | Separator !SeparatorGuard
+            | Plain = Text=(!PartSuffix Any)+
           }
-          syntax PartSuffix  { | Separator | Part | Table; }
+          syntax PartSuffix  { | Separator | Table | Token; }
         }
 
       | Blockquote        = "<\"" Header? WsOpt NewLine PartContent* Token WsOpt

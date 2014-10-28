@@ -5,6 +5,7 @@ using Nemerle;
 using Nemerle.Collections;
 using Nemerle.Imperative;
 using Nemerle.Text;
+using Nemerle.Extensions;
 using Nemerle.Utility;
 
 using RsdnMarkdown.Declarations;
@@ -181,7 +182,7 @@ namespace RsdnMarkdown
         when (tableRows.Count == 0)
           return;
           
-        ProcessTable(context, writer, tableRows);
+        ProcessTable(context, writer, block, tableRows);
           
         closeBlock("</tbody>");
         closeBlock("</table>");
@@ -346,24 +347,71 @@ namespace RsdnMarkdown
       sb.ToString()
     }
 
-    public ProcessTable(context : Context, writer : StringWriter, tables : List[Table]) : void
+    public ProcessTable(context : Context, writer : StringWriter, text : string, tables : List[Table]) : void
     {
-      def result = List();
-      mutable curr = [];
-      
-      foreach (table in tables)
+      mutable prev = null;
+      mutable isContinue = false;
+      mutable separatorCount = 0;
+
+      def makeTableRows()
       {
-        if (curr == null)
-        {
-          curr ::= table;
-          continue;
-        }
-        else if (curr.Head.Close == "||>")
-          curr ::= table;
-        else
-          result.Add(table);
-          
+        def result = List();
         
+        foreach (table in tables)
+        {
+          def currSeparatorCount = table.Parts.Count(p => p is TablePart.Separator);
+        
+          if (isContinue && separatorCount == currSeparatorCount)
+            prev ::= table;
+          else
+          {
+            when (prev != null)
+              result.Add(prev);
+            prev = [table];
+          }
+          
+          separatorCount = currSeparatorCount;
+          isContinue = table.Close.Length > 2;
+        }
+      
+        when (prev != null)
+          result.Add(prev);
+          
+        result
+      }
+      
+      def rows = makeTableRows();
+      
+      foreach (row in rows)
+      {
+        | [parts] => _ = parts.Parts.MapToArrayFiltered(p => !(p is TablePart.Separator), p => text.Substring(p.Span.StartPos, p.Span.Length));
+        | _ =>
+          mutable count = 0;
+          foreach (parts in row)
+          {
+            foreach (part in parts.Parts)
+            {
+              | Table | Plain => count++;
+              | Separator     => ()
+            }
+            break;
+          }
+          
+          def rowsCount = row.Count();
+          
+          def builders = array(count);
+          for (mutable i = 0; i < builders.Length; i++)
+            builders[i] = array(rowsCount);
+        
+          foreach (parts in row with i)
+          {
+            mutable partIndex = 0;
+            foreach (part in parts.Parts)
+            {
+              | Table | Plain => builders[i][partIndex] = ""; partIndex++;
+              | Separator     => ()
+            }
+          }
       }
     }
     
