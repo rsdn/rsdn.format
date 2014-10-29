@@ -382,20 +382,41 @@ namespace RsdnMarkdown
       def rows = makeTableRows();
       def makeTableArray() : array[array[string]]
       {
+        def calcColumnsCount(parts : Seq[TablePart]) : int
+        {
+          mutable count = 1;
+          foreach (part in parts)
+          {
+            | Table | Plain => ()
+            | Separator     => count++;
+          }
+          count
+        }
+        def partsToColumnsText(table : Table) : array[string]
+        {
+          def parts = table.Parts;
+          def count = calcColumnsCount(parts);
+          def result = array(count);
+          mutable i = 0;
+          mutable start = table.Open.EndPos;
+          foreach (part in parts)
+          {
+            | Table | Plain => ()
+            | Separator     => result[i] = text.Substring(start, part.Span.StartPos - start); start = part.Span.EndPos; i++;
+          }
+          result[i] = text.Substring(start, table.Close.StartPos - start);
+          result
+        }
         def resultRows = array(rows.Count);
       
         foreach (row in rows with resultRowIndex)
         {
-          | [parts] => resultRows[resultRowIndex] = parts.Parts.MapToArrayFiltered(p => !(p is TablePart.Separator), p => text.Substring(p.Span.StartPos, p.Span.Length));
+          | [parts] => resultRows[resultRowIndex] = partsToColumnsText(parts);
           | _ =>
-            mutable count = 0;
+            mutable count = 1;
             foreach (parts in row)
             {
-              foreach (part in parts.Parts)
-              {
-                | Table | Plain => count++;
-                | Separator     => ()
-              }
+              count = calcColumnsCount(parts.Parts);
               break;
             }
           
@@ -406,14 +427,8 @@ namespace RsdnMarkdown
               builders[i] = array(rowsCount);
         
             foreach (parts in row with rowIndex)
-            {
-              mutable colIndex = 0;
-              foreach (part in parts.Parts)
-              {
-                | Table | Plain => builders[colIndex][rowIndex] = text.Substring(part.Span.StartPos, part.Span.Length); colIndex++;
-                | Separator     => ()
-              }
-            }
+              foreach (colText in partsToColumnsText(parts) with colIndex)
+                builders[colIndex][rowIndex] = colText;
           
             def columns = array(count);
             def nl = Environment.NewLine;
