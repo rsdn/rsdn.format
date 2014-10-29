@@ -23,6 +23,10 @@ VD>+![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
 VD>+![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
 VD>Картинка ![[ http://s.rimg.info/5962bb18d0aff8d7b1a22b492ef7b499.gif ]] по месту.
 
+<| R1 C1 | R1 C2 |>
+<| R2 C1 P1 | <| ssss | sss ||> ||>
+<| R2 C1 P2 | <| zzzz | zzz ||> |>
+
 <"
 Один классик сказал …
 <"
@@ -77,7 +81,9 @@ Mixed list
 
 Horizontral rule
 ---
-!!! Moderator message !!!
+<!
+Moderator message
+!>
 @@@ Tagline string
 
 Emoticons (TBD): :):)):))):(;):-\:???::no::up::down::super::shuffle::wow::crash::user::maniac::xz::beer:
@@ -100,3 +106,6 @@ AA>Level 1 Quotation
 BB>>>>Level 4 Quotation
 Отевет на цитату.
 
+AA><| R1 C1 | R1 C2 |>
+AA><| R2 C1 P1 | <| ssss | sss ||> ||>
+AA><| R2 C1 P2 | <| zzzz | zzz ||> |>
