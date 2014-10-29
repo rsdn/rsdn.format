@@ -379,39 +379,66 @@ namespace RsdnMarkdown
           
         result
       }
-      
       def rows = makeTableRows();
-      
-      foreach (row in rows)
+      def makeTableArray() : array[array[string]]
       {
-        | [parts] => _ = parts.Parts.MapToArrayFiltered(p => !(p is TablePart.Separator), p => text.Substring(p.Span.StartPos, p.Span.Length));
-        | _ =>
-          mutable count = 0;
-          foreach (parts in row)
-          {
-            foreach (part in parts.Parts)
+        def resultRows = array(rows.Count);
+      
+        foreach (row in rows with resultRowIndex)
+        {
+          | [parts] => resultRows[resultRowIndex] = parts.Parts.MapToArrayFiltered(p => !(p is TablePart.Separator), p => text.Substring(p.Span.StartPos, p.Span.Length));
+          | _ =>
+            mutable count = 0;
+            foreach (parts in row)
             {
-              | Table | Plain => count++;
-              | Separator     => ()
+              foreach (part in parts.Parts)
+              {
+                | Table | Plain => count++;
+                | Separator     => ()
+              }
+              break;
             }
-            break;
-          }
           
-          def rowsCount = row.Count();
+            def rowsCount = row.Count();
           
-          def builders = array(count);
-          for (mutable i = 0; i < builders.Length; i++)
-            builders[i] = array(rowsCount);
+            def builders = array(count);
+            for (mutable i = 0; i < builders.Length; i++)
+              builders[i] = array(rowsCount);
         
-          foreach (parts in row with i)
-          {
-            mutable partIndex = 0;
-            foreach (part in parts.Parts)
+            foreach (parts in row with rowIndex)
             {
-              | Table | Plain => builders[i][partIndex] = ""; partIndex++;
-              | Separator     => ()
+              mutable colIndex = 0;
+              foreach (part in parts.Parts)
+              {
+                | Table | Plain => builders[colIndex][rowIndex] = text.Substring(part.Span.StartPos, part.Span.Length); colIndex++;
+                | Separator     => ()
+              }
             }
-          }
+          
+            def columns = array(count);
+            def nl = Environment.NewLine;
+          
+            foreach (builder in builders with i)
+              columns[i] = string.Join(nl, builder);
+          
+            resultRows[resultRowIndex] = columns;
+        }
+        
+        resultRows
+      }
+      def tableArray = makeTableArray();
+      
+      foreach (cols in tableArray)
+      {
+        writer.WriteLine("<tr>");
+        foreach (col in cols)
+        {
+          writer.WriteLine("<td>");
+          def content = ProcessQuotationBlock(context, col);
+          writer.WriteLine(content);
+          writer.WriteLine("</td>");
+        }
+        writer.WriteLine("</tr>");
       }
     }
     
