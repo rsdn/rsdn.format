@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Config>
-  <Lib Path="..\..\bin\Debug\RsdnMarkdown.dll">
+  <Lib Path="..\bin\Debug\RsdnMarkdown.dll">
     <SyntaxModule Name="RsdnMarkdown.ContentSyntax" StartRule="Start" />
   </Lib>
 </Config>
