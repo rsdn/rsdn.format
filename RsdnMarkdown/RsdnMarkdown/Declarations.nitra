@@ -45,7 +45,7 @@ namespace RsdnMarkdown.Declarations
   declare Root from ParagraphSyntax.Start { Paragraphs <- Contents; }
 
   declare Paragraph       from ParagraphSyntax.Content;
-  declare Paragraph       from ParagraphSyntax.Content.Formated = Part.GetDeclaration(parent);
+  declare Paragraph       from ParagraphSyntax.Content.Formated <- Part;
   declare Paragraph.Plain from ParagraphSyntax.Content.Paragraph
   {
     Content = Content;
@@ -79,7 +79,7 @@ namespace RsdnMarkdown.Declarations
 
   declare TablePart from ParagraphSyntax.Part.Table.TablePart
   {
-    | Table     { Content = Table.GetDeclaration(parent); }
+    | Table     { Content <- Table; }
     | Separator { Content = Separator; }
     | Plain     { Content = Text; }
   }

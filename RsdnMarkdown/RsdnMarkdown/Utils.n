@@ -139,7 +139,7 @@ namespace RsdnMarkdown
         def paragraph   = block.Substring(contentSpan.StartPos, contentSpan.Length);
         def source      = SingleLineSourceSnapshot(paragraph);
         def parseResult = ContentSyntax.Start(source, parserHost);
-        def ast         = ContentSyntaxAst.Start.Create(parseResult);
+        def ast         = ContentSyntaxParseTree.Start.Create(parseResult);
         ast.ToHtml(context, writer);
       }
       
@@ -341,8 +341,9 @@ namespace RsdnMarkdown
 
       def source          = SourceSnapshot(block);
       def parseResult     = ParagraphSyntax.Start(source, parserHost);
-      def declarationRoot = parseResult.GetDeclarationRoot();
-      def paragraphRoot   = declarationRoot.Content :> Declarations.Root;
+      def parseTree       = ParagraphSyntaxParseTree.Start.Create(parseResult);
+      def declarationRoot = DeclarationRoot.Create(null, parseTree);
+      def paragraphRoot   = declarationRoot.Content;
       decls(paragraphRoot.Paragraphs);
       sb.ToString()
     }
@@ -389,6 +390,7 @@ namespace RsdnMarkdown
           {
             | Table | Plain => ()
             | Separator     => count++;
+            | _ => assert3(false);
           }
           count
         }
@@ -403,6 +405,7 @@ namespace RsdnMarkdown
           {
             | Table | Plain => ()
             | Separator     => result[i] = text.Substring(start, part.Span.StartPos - start); start = part.Span.EndPos; i++;
+            | _ => assert3(false);
           }
           result[i] = text.Substring(start, table.Close.StartPos - start);
           result

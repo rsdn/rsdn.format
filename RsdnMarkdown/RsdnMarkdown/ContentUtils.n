@@ -52,13 +52,13 @@ namespace RsdnMarkdown
     
     // TODO: Сделать поддержку таблиц
     
-    internal ProcessContent(_context : Context, writer : TextWriter, ast : Ast, span : NSpan) : void
+    internal ProcessContent(_context : Context, writer : TextWriter, ast : ParseTree, span : NSpan) : void
     {
       def str = ast.GetText(span);
       HtmlEncode(str, writer);
     }
 
-    internal ProcessContent(_context : Context, writer : TextWriter, tag : string, ast : Ast, span : NSpan) : void
+    internal ProcessContent(_context : Context, writer : TextWriter, tag : string, ast : ParseTree, span : NSpan) : void
     {
       writer.Write("<");
       writer.Write(tag);
@@ -69,7 +69,7 @@ namespace RsdnMarkdown
       writer.Write(">");
     }
 
-    internal ProcessAutoUri(context : Context, writer : TextWriter, ast : Ast) : void
+    internal ProcessAutoUri(context : Context, writer : TextWriter, ast : ParseTree) : void
     {
       def url = ast.GetText();
       def urlSource = url.TrimEnd('.', ',', ')');
@@ -83,7 +83,7 @@ namespace RsdnMarkdown
       }
     }
 
-    internal ProcessUri(context : Context, writer : TextWriter, imgOpt : OptionAst[NSpan], urlTextOpt : OptionAst[SequenceAst[ContentSyntaxAst.UrlText, NSpan]], url : ContentSyntaxAst.Url) : void
+    internal ProcessUri(context : Context, writer : TextWriter, imgOpt : OptionParseTree[NSpan], urlTextOpt : OptionParseTree[SequenceParseTree[ContentSyntaxParseTree.UrlText, NSpan]], url : ContentSyntaxParseTree.Url) : void
     {
       def urlSource = url.GetText().Trim();
       def urlSource = if (GetUriScheme(urlSource).Length == 0) "http://" + urlSource else urlSource;
@@ -119,7 +119,7 @@ $<#<div class="$tagClass">
       writer.Write(<#</a>#>);
     }
 
-    internal ProcessSmile(_context : Context, writer : TextWriter, ast : Ast, span : NSpan) : void
+    internal ProcessSmile(_context : Context, writer : TextWriter, ast : ParseTree, span : NSpan) : void
     {
       match (ast.GetText(span))
       {
@@ -145,7 +145,7 @@ $<#<div class="$tagClass">
       }
     }
     
-    internal ProcessCode(_context : Context, writer : TextWriter, ast : Ast, languageName : NSpan, code : NSpan) : void
+    internal ProcessCode(_context : Context, writer : TextWriter, ast : ParseTree, languageName : NSpan, code : NSpan) : void
     {
       // TODO: Сделать версию для инлайн и отдельного блока кода.
       def lang = 
@@ -160,7 +160,7 @@ $<#<div class="$tagClass">
       writer.Write("</span>");
     }
     
-    internal ProcessAutoCorrect(_context : Context, writer : TextWriter, ast : Ast, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
+    internal ProcessAutoCorrect(_context : Context, writer : TextWriter, ast : ParseTree, ws1 : NSpan, text : NSpan, ws2 : NSpan) : void
     {
       writer.Write(ast.GetText(ws1));
       match (ast.GetText(text))
