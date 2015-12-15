@@ -4,7 +4,7 @@
   syntax module ParagraphSyntax
   {
     using Nitra.Core;
-    using CStyleComments;
+    using Nitra.CStyleComments;
 
     using Nitra;
     using RsdnMarkdown.Utils;

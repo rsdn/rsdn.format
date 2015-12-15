@@ -9,7 +9,7 @@ namespace RsdnMarkdown
   syntax module ContentSyntax
   {
     using Nitra.Core;
-    using CStyleComments;
+    using Nitra.CStyleComments;
 
     regex W                     = Whitespace; // without new line
     regex Ws                    = Whitespace+; // without new line

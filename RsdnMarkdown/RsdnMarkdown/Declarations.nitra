@@ -5,12 +5,12 @@ namespace RsdnMarkdown.Declarations
 {
   using Nitra.Core;
 
-  declaration Root
+  ast Root
   {
     Paragraphs : Paragraph*;
   }
 
-  abstract declaration Paragraph
+  abstract ast Paragraph
   {
     | Plain             { Content : NSpan; Eol : NSpan; }
     | H1                { Content : NSpan; }
@@ -23,23 +23,23 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content : NSpan; Level : int; }
     | OrderedListItem   { Content : NSpan; Level : int; }
     | Hr
-    | Table             { Content : TableContent; }
+    | Table             { Content : RsdnMarkdown.Declarations.Table; }
     | CodeBlock         { Code    : NSpan;       Header : NSpan; Lang   : NSpan; }
     | FoldedBlock       { Content : Paragraph*;  Header : NSpan; }
     | Blockquote        { Content : Paragraph*;  Header : NSpan; }
     | Moderator         { Content : Paragraph*; }
   }
 
-  declaration TableContent
+  ast Table
   {
     Open  : NSpan;
     Close : NSpan;
     Parts : TablePart*;
   }
 
-  abstract declaration TablePart
+  abstract ast TablePart
   {
-    | Table     { Content : TableContent; }
+    | Table     { Content : RsdnMarkdown.Declarations.Table; }
     | Separator { Content : NSpan; }
     | Plain     { Content : NSpan; }
   }

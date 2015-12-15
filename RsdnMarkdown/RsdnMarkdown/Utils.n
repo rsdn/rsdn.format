@@ -130,7 +130,6 @@ namespace RsdnMarkdown
     
     public ProcessQuotationBlock(context : Context, block : string) : string
     {
-      def parserHost  = ParserHost();
       def sb          = StringBuilder();
       def writer      = StringWriter(sb);
 
@@ -138,11 +137,11 @@ namespace RsdnMarkdown
       {
         def paragraph   = block.Substring(contentSpan.StartPos, contentSpan.Length);
         def source      = SingleLineSourceSnapshot(paragraph);
-        def parseResult = ContentSyntax.Start(source, parserHost);
-        def ast         = ContentSyntaxParseTree.Start.Create(parseResult);
-        ast.ToHtml(context, writer);
+        def parseResult = ContentSyntax.Start.Parse(source);
+        def parseTree   = parseResult.CreateParseTree() :> ContentSyntaxParseTree.Start;
+        parseTree.ToHtml(context, writer);
       }
-      
+
       def listStack = SCG.Stack();
       mutable prevLevel;
       mutable prevIsOrdered;
@@ -287,8 +286,8 @@ namespace RsdnMarkdown
             | H5                as p => open("<h5>");                             content(p.Content);  close("</h5>");
             | H6                as p => open("<h6>");                             content(p.Content);  close("</h6>");
             | TagLine           as p => open("<div class='tagline'>");            content(p.Content);  close("</div>");
-            | UnorderedListItem as p => openListItem(p.Level, false);             content(p.Content);  close("</li>");
-            | OrderedListItem   as p => openListItem(p.Level, true);              content(p.Content);  close("</li>");
+            | UnorderedListItem as p => openListItem(p.Level.ValueOrDefault, false); content(p.Content);  close("</li>");
+            | OrderedListItem   as p => openListItem(p.Level.ValueOrDefault, true);  content(p.Content);  close("</li>");
             | Table             as p => onTable(p.Content)
             | CodeBlock         as p => 
               if (p.Header.IsEmpty)
@@ -308,8 +307,8 @@ namespace RsdnMarkdown
               }
               else
               {
-                def par = Paragraph.CodeBlock(p.Parent, p.Span);
-                par.Initialize(p.Code, NSpan(), p.Lang); // Создаем такую же цитату, но без заголовка...
+                // Создаем такую же цитату, но без заголовка...
+                def par = Paragraph.CodeBlock(p.File, p.Span, Code = p.Code, Header = NSpan(), Lang = p.Lang);
                 foldable(p.Header, [par]); // ... и рекурсивно генерим для нее HTML.
               }
             | Blockquote        as p => 
@@ -321,8 +320,8 @@ namespace RsdnMarkdown
               }
               else
               {
-                def par = Paragraph.Blockquote(p.Parent, p.Span);
-                par.Initialize(p.Content, NSpan()); // Создаем такую же цитату, но без заголовка...
+                // Создаем такую же цитату, но без заголовка...
+                def par = Paragraph.Blockquote(p.File, p.Span, Content = p.Content, Header = NSpan());
                 foldable(p.Header, [par]); // ... и рекурсивно генерим для нее HTML.
               }
               
@@ -340,10 +339,9 @@ namespace RsdnMarkdown
       }
 
       def source          = SourceSnapshot(block);
-      def parseResult     = ParagraphSyntax.Start(source, parserHost);
-      def parseTree       = ParagraphSyntaxParseTree.Start.Create(parseResult);
-      def declarationRoot = DeclarationRoot.Create(null, parseTree);
-      def paragraphRoot   = declarationRoot.Content;
+      def parseResult     = ParagraphSyntax.Start.Parse(source);
+      def parseTree       = parseResult.CreateParseTree();
+      def paragraphRoot   = parseTree.GetAstUntyped() :> Root;
       decls(paragraphRoot.Paragraphs);
       sb.ToString()
     }

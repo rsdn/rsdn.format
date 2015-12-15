@@ -8,7 +8,7 @@ namespace RsdnMarkdown.Declarations
   map syntax ParagraphSyntax.Content -> Paragraph
   {
     | Formated  { Part }
-    | Paragraph
+    | Paragraph -> Plain
       {
         Content = Content;
         Eol     = End.Location.Span;
@@ -24,8 +24,8 @@ namespace RsdnMarkdown.Declarations
     | H5                { Content = PartContent.Location.Span; }
     | H6                { Content = PartContent.Location.Span; }
     | TagLine           { Content = PartContent.Location.Span; }
-    | UnorderedListItem { Content = PartContent.Location.Span; Level = UnorderedListItemPrefix.Length; }
-    | OrderedListItem   { Content = PartContent.Location.Span; Level = OrderedListItemPrefix.Length;   }
+    | UnorderedListItem { Content = PartContent.Location.Span; Level = ParsedValue(UnorderedListItemPrefix, UnorderedListItemPrefix.Length); }
+    | OrderedListItem   { Content = PartContent.Location.Span; Level = ParsedValue(OrderedListItemPrefix, OrderedListItemPrefix.Length);   }
     | Hr                {}
     | Blockquote        { PartContents -> Content; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
     | FoldedBlock       { PartContents -> Content; Header = Header.ContentSpan(); }
@@ -41,5 +41,10 @@ namespace RsdnMarkdown.Declarations
     | Plain     { Content = Text; }
   }
 
-  map syntax ParagraphSyntax.Part.Table.Table -> TableContent { Open = Open; Close = Close; TableParts -> Parts; }
+  map syntax ParagraphSyntax.Part.Table.Table -> Table { Open = Open; Close = Close; TableParts -> Parts; }
+
+  map syntax ParagraphSyntax.Part.Blockquote.PartContent  -> Paragraph { Content }
+  map syntax ParagraphSyntax.Part.FoldedBlock.PartContent -> Paragraph { Content }
+  map syntax ParagraphSyntax.Part.Moderator.PartContent   -> Paragraph { Content }
+
 }
