@@ -3,12 +3,14 @@ using System.Linq;
 
 namespace RsdnMarkdown.Declarations
 {
+  using Nitra.Core;
+
   declaration Root
   {
     Paragraphs : Paragraph*;
   }
 
-  declarations Paragraph
+  abstract declaration Paragraph
   {
     | Plain             { Content : NSpan; Eol : NSpan; }
     | H1                { Content : NSpan; }
@@ -21,66 +23,24 @@ namespace RsdnMarkdown.Declarations
     | UnorderedListItem { Content : NSpan; Level : int; }
     | OrderedListItem   { Content : NSpan; Level : int; }
     | Hr
-    | Table             { Content : RsdnMarkdown.Declarations.Table; }
+    | Table             { Content : TableContent; }
     | CodeBlock         { Code    : NSpan;       Header : NSpan; Lang   : NSpan; }
     | FoldedBlock       { Content : Paragraph*;  Header : NSpan; }
     | Blockquote        { Content : Paragraph*;  Header : NSpan; }
     | Moderator         { Content : Paragraph*; }
   }
 
-  declaration Table
+  declaration TableContent
   {
     Open  : NSpan;
     Close : NSpan;
     Parts : TablePart*;
   }
 
-  declarations TablePart
+  abstract declaration TablePart
   {
-    | Table     { Content : RsdnMarkdown.Declarations.Table; }
+    | Table     { Content : TableContent; }
     | Separator { Content : NSpan; }
     | Plain     { Content : NSpan; }
-  }
-
-  declare Root from ParagraphSyntax.Start { Paragraphs <- Contents; }
-
-  declare Paragraph       from ParagraphSyntax.Content;
-  declare Paragraph       from ParagraphSyntax.Content.Formated <- Part;
-  declare Paragraph.Plain from ParagraphSyntax.Content.Paragraph
-  {
-    Content = Content;
-    Eol     = End.Location.Span;
-  }
-
-  declare Paragraph from ParagraphSyntax.Part
-  {
-    | H1                { Content = PartContent.Location.Span; }
-    | H2                { Content = PartContent.Location.Span; }
-    | H3                { Content = PartContent.Location.Span; }
-    | H4                { Content = PartContent.Location.Span; }
-    | H5                { Content = PartContent.Location.Span; }
-    | H6                { Content = PartContent.Location.Span; }
-    | TagLine           { Content = PartContent.Location.Span; }
-    | UnorderedListItem { Content = PartContent.Location.Span; Level = UnorderedListItemPrefix.Length; }
-    | OrderedListItem   { Content = PartContent.Location.Span; Level = OrderedListItemPrefix.Length;   }
-    | Hr                {}
-    | Blockquote        { Content <- PartContents; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
-    | FoldedBlock       { Content <- PartContents; Header = Header.ContentSpan(); }
-    | CodeBlock         { Code = Code; Lang = LanguageName; Header = if (HeaderOpt.HasValue) HeaderOpt.Value.ContentSpan() else HeaderOpt.Location.Span; }
-    | Table             { Content <- Table; }
-    | Moderator         { Content <- PartContents; }
-  }
-
-  declare Paragraph       from ParagraphSyntax.Part.Blockquote.PartContent;
-  declare Paragraph       from ParagraphSyntax.Part.FoldedBlock.PartContent;
-  declare Paragraph       from ParagraphSyntax.Part.Moderator.PartContent;
-
-  declare Table from ParagraphSyntax.Part.Table.Table { Open = Open; Close = Close; Parts <- TableParts; }
-
-  declare TablePart from ParagraphSyntax.Part.Table.TablePart
-  {
-    | Table     { Content <- Table; }
-    | Separator { Content = Separator; }
-    | Plain     { Content = Text; }
   }
 }

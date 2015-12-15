@@ -8,12 +8,7 @@ namespace RsdnMarkdown
   [ExplicitSpaces]
   syntax module ContentSyntax
   {
-    using PrettyPrint;
-    using Outline;
-    using TokenNames;
-    using StandardSpanClasses;
-    using Whitespaces;
-    using Identifiers;
+    using Nitra.Core;
     using CStyleComments;
 
     regex W                     = Whitespace; // without new line
@@ -33,7 +28,7 @@ namespace RsdnMarkdown
     token UrlText = (!NotAllowedUrlTextChar Any)*;
 
     [StartRule]
-    syntax Start = Content* !Any
+    syntax Start = Content*
     {
       ToHtml(context : Context, writer : TextWriter) : void = foreach (content in Contents) content.ToHtml(context, writer);
     }

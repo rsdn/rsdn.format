@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <!--NitraPath Condition=" '$(NitraPath)' == '' ">g:\p\Nitra\Nitra\Nitra.Compiler\bin\Debug\Stage1\</NitraPath-->
+    <NitraPath Condition=" '$(NitraPath)' == '' ">g:\p\Nitra\bin\Debug\Stage2\</NitraPath>
     <NitraCompilerPath Condition=" '$(NitraCompilerPath)' == '' ">$(NitraPath)</NitraCompilerPath>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -51,15 +51,11 @@
       <Private>False</Private>
     </MacroReference>
     <Reference Include="mscorlib" />
+    <Reference Include="System" />
     <Reference Include="Nemerle">
-      <Name>Nemerle</Name>
-      <AssemblyName>Nemerle.dll</AssemblyName>
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>$(Nemerle)\Nemerle.dll</HintPath>
-    </Reference>
-    <Reference Include="Nitra.Core">
-      <Name>Nitra.Core</Name>
-      <AssemblyName>Nitra.Core.dll</AssemblyName>
-      <HintPath>$(NitraPath)\Nitra.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Nitra.Runtime">
       <Name>Nitra.Runtime</Name>
@@ -67,26 +63,13 @@
       <HintPath>$(NitraPath)\Nitra.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
-    <Reference Include="System.Data.DataSetExtensions">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Nemerle">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>$(Nemerle)\Nemerle.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <MacroReference Include="Nemerle.Linq">
-      <HintPath>$(Nemerle)\Nemerle.Linq.dll</HintPath>
-    </MacroReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Content.nitra" />
@@ -97,6 +80,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Declarations.nitra">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Mapping.nitra">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.n" />

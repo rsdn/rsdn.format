@@ -3,16 +3,11 @@
   [ExplicitSpaces]
   syntax module Uri
   {
-    using PrettyPrint;
-    using Outline;
-    using TokenNames;
-    using StandardSpanClasses;
-    using Whitespaces;
-    using Identifiers;
+    using Nitra.Core;
   
     [StartRule]
-    syntax Start = s UriLine* !Any;
-    syntax UriLine = Uri s nl;
+    syntax Start = UriLine*;
+    syntax UriLine = Uri nl;
 
     syntax GuessUri    = &UrlCommonPrefix Uri
     {

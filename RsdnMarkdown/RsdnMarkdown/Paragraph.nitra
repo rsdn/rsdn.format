@@ -3,12 +3,7 @@
   [ExplicitSpaces]
   syntax module ParagraphSyntax
   {
-    using PrettyPrint;
-    using Outline;
-    using TokenNames;
-    using StandardSpanClasses;
-    using Whitespaces;
-    using Identifiers;
+    using Nitra.Core;
     using CStyleComments;
 
     using Nitra;
