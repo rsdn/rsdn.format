@@ -1,7 +1,7 @@
 ﻿@font-face {
   font-family: 'FontAwesome';
-  src: url('http://rsdn.ru/Content/font-awe/fontawesome-webfont.eot');
-  src: url('http://rsdn.ru/Content/font-awe/fontawesome-webfont.eot') format('embedded-opentype'), url('http://rsdn.ru/Content/font-awe/fontawesome-webfont.svg') format('svg'), url('http://rsdn.ru/Content/font-awe/fontawesome-webfont.woff') format('woff'), url('http://rsdn.ru/Content/font-awe/fontawesome-webfont.ttf') format('truetype');
+  src: url('http://rsdn.org/Content/font-awe/fontawesome-webfont.eot');
+  src: url('http://rsdn.org/Content/font-awe/fontawesome-webfont.eot') format('embedded-opentype'), url('http://rsdn.org/Content/font-awe/fontawesome-webfont.svg') format('svg'), url('http://rsdn.org/Content/font-awe/fontawesome-webfont.woff') format('woff'), url('http://rsdn.org/Content/font-awe/fontawesome-webfont.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }

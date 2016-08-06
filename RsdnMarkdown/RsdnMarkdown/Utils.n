@@ -308,7 +308,7 @@ namespace RsdnMarkdown
               else
               {
                 // Создаем такую же цитату, но без заголовка...
-                def par = Paragraph.CodeBlock(p.File, p.Span, Code = p.Code, Header = NSpan(), Lang = p.Lang);
+                def par = Paragraph.CodeBlock(p.Location, Code = p.Code, Header = NSpan(), Lang = p.Lang, TryEvalSpan=false);
                 foldable(p.Header, [par]); // ... и рекурсивно генерим для нее HTML.
               }
             | Blockquote        as p => 
@@ -321,7 +321,7 @@ namespace RsdnMarkdown
               else
               {
                 // Создаем такую же цитату, но без заголовка...
-                def par = Paragraph.Blockquote(p.File, p.Span, Content = p.Content, Header = NSpan());
+                def par = Paragraph.Blockquote(p.Location, Content = p.Content, Header = NSpan());
                 foldable(p.Header, [par]); // ... и рекурсивно генерим для нее HTML.
               }
               
@@ -413,7 +413,7 @@ namespace RsdnMarkdown
         foreach (row in rows with resultRowIndex)
         {
           | [parts] => resultRows[resultRowIndex] = partsToColumnsText(parts);
-          | _ =>
+          | null | _ =>
             mutable count = 1;
             foreach (parts in row)
             {

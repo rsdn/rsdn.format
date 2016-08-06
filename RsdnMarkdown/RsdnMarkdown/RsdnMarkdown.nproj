@@ -12,7 +12,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RsdnMarkdown</RootNamespace>
     <AssemblyName>RsdnMarkdown</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NoStdLib>true</NoStdLib>
     <NemerleVersion>Net-4.0</NemerleVersion>
@@ -44,23 +44,16 @@
     <DocumentationFile>$(OutputPath)\$(AssemblyName).xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <MacroReference Include="Nitra.Compiler">
-      <Name>Nitra.Compiler</Name>
-      <AssemblyName>Nitra.Compiler.dll</AssemblyName>
-      <HintPath>$(NitraCompilerPath)\Nitra.Compiler.dll</HintPath>
-      <Private>False</Private>
-    </MacroReference>
     <Reference Include="mscorlib" />
+    <Reference Include="Nitra.Runtime">
+      <Name>Nitra.Runtime</Name>
+      <AssemblyName>Nitra.Runtime.dll</AssemblyName>
+      <HintPath>External\Nitra.Runtime.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="Nemerle">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(Nemerle)\Nemerle.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Nitra.Runtime">
-      <Name>Nitra.Runtime</Name>
-      <AssemblyName>Nitra.Runtime.dll</AssemblyName>
-      <HintPath>$(NitraPath)\Nitra.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Core">
@@ -103,6 +96,14 @@
     <Compile Include="Paragraph.nitra">
       <SubType>Content</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <MacroReference Include="Nitra.Compiler">
+      <Name>Nitra.Compiler</Name>
+      <AssemblyName>Nitra.Compiler.dll</AssemblyName>
+      <HintPath>External\Nitra.Compiler.dll</HintPath>
+      <Private>False</Private>
+    </MacroReference>
   </ItemGroup>
   <Import Project="$(Nemerle)\Nemerle.MSBuild.targets" />
   <!--

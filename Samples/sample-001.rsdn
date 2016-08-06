@@ -8,19 +8,19 @@ Paragraph with **bold**, //emphasis (possibly italic)//, --deleted--, Xvvsubscri
 <+ Block name
 Foldable paragraph.
 +>
-Ссылка: [[ RSDN.ru ]], [[ Not visited | some.site ]]
+Ссылка: [[ rsdn.org ]], [[ Not visited | some.site ]]
 
 Картинки:
-![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
-![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
-+![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
-+![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
+![[ Image name | http://rsdn.org/mag/cover/mag0302.jpg ]]
+![[ http://rsdn.org/mag/cover/mag0302.jpg ]]
++![[ Image name | http://rsdn.org/mag/cover/mag0302.jpg ]]
++![[ http://rsdn.org/mag/cover/mag0302.jpg ]]
 Картинка ![[ http://s.rimg.info/5962bb18d0aff8d7b1a22b492ef7b499.gif ]] по месту.
 
-VD>![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
-VD>![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
-VD>+![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
-VD>+![[ http://rsdn.ru/mag/cover/mag0302.jpg ]]
+VD>![[ Image name | http://rsdn.org/mag/cover/mag0302.jpg ]]
+VD>![[ http://rsdn.org/mag/cover/mag0302.jpg ]]
+VD>+![[ Image name | http://rsdn.org/mag/cover/mag0302.jpg ]]
+VD>+![[ http://rsdn.org/mag/cover/mag0302.jpg ]]
 VD>Картинка ![[ http://s.rimg.info/5962bb18d0aff8d7b1a22b492ef7b499.gif ]] по месту.
 
 <| R1 C1 | R1 C2 |>
@@ -96,7 +96,7 @@ AA>Level 1 Quotation
 Отевет на цитату.
 
 BB>>>>Level 4 Quotation 
-AA>Level 1 Quotation ![[ Image name | http://rsdn.ru/mag/cover/mag0302.jpg ]]
+AA>Level 1 Quotation ![[ Image name | http://rsdn.org/mag/cover/mag0302.jpg ]]
 Отевет на цитату.
 
 BB>>>>Level 4 Quotation

@@ -69,7 +69,7 @@ namespace InteractiveTest.Properties {
         ///  &lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=EDGE&quot; /&gt;
         ///  &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html;charset=utf-8&quot;&gt;
         ///  &lt;link rel=&quot;stylesheet&quot; href=&quot;Scripts/rsdn.format.css&quot;&gt;
-        ///  &lt;script src=&quot;http://rsdn.ru/Scripts/jquery-2.1.1.js&quot;&gt;&lt;/script&gt;
+        ///  &lt;script src=&quot;http://rsdn.org/Scripts/jquery-2.1.1.js&quot;&gt;&lt;/script&gt;
         ///  &lt;link rel=&quot;stylesheet&quot; href=&quot;http://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.2/styles/vs.min.css&quot;&gt;
         ///  &lt;script src=&quot;http://cdnjs.cloudflare.com/ [rest of string was truncated]&quot;;.
         /// </summary>

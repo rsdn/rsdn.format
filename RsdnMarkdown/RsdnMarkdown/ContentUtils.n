@@ -123,24 +123,24 @@ $<#<div class="$tagClass">
     {
       match (ast.GetText(span))
       {
-        | <#:)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smile.gif">#>);
-        | <#:))#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/biggrin.gif">#>);
-        | <#:)))#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/lol.gif">#>);
-        | <#:(#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/frown.gif">#>);
-        | <#;)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/wink.gif">#>);
-        | <#:-\#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/smirk.gif">#>);
-        | <#:???:#>     => writer.Write(<#<img border="0" width="15" height="22" src="http://rsdn.ru/Forum/Images/confused.gif">#>);
-        | <#:no:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/no.gif">#>);
-        | <#:up:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/sup.gif">#>);
-        | <#:down:#>    => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.ru/Forum/Images/down.gif">#>);
-        | <#:super:#>   => writer.Write(<#<img border="0" width="26" height="28" src="http://rsdn.ru/Forum/Images/super.gif">#>);
-        | <#:shuffle:#> => writer.Write(<#<img border="0" width="15" height="20" src="http://rsdn.ru/Forum/Images/shuffle.gif">#>);
-        | <#:wow:#>     => writer.Write(<#<img border="0" width="19" height="19" src="http://rsdn.ru/Forum/Images/wow.gif">#>);
-        | <#:crash:#>   => writer.Write(<#<img border="0" width="30" height="30" src="http://rsdn.ru/Forum/Images/crash.gif">#>);
-        | <#:user:#>    => writer.Write(<#<img border="0" width="40" height="20" src="http://rsdn.ru/Forum/Images/user.gif">#>);
-        | <#:maniac:#>  => writer.Write(<#<img border="0" width="70" height="25" src="http://rsdn.ru/Forum/Images/maniac.gif">#>);
-        | <#:xz:#>      => writer.Write(<#<img border="0" width="37" height="15" src="http://rsdn.ru/Forum/Images/xz.gif">#>);
-        | <#:beer:#>    => writer.Write(<#<img border="0" width="57" height="16" src="http://rsdn.ru/Forum/Images/beer.gif">#>);
+        | <#:)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/smile.gif">#>);
+        | <#:))#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/biggrin.gif">#>);
+        | <#:)))#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/lol.gif">#>);
+        | <#:(#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/frown.gif">#>);
+        | <#;)#>        => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/wink.gif">#>);
+        | <#:-\#>       => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/smirk.gif">#>);
+        | <#:???:#>     => writer.Write(<#<img border="0" width="15" height="22" src="http://rsdn.org/Forum/Images/confused.gif">#>);
+        | <#:no:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/no.gif">#>);
+        | <#:up:#>      => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/sup.gif">#>);
+        | <#:down:#>    => writer.Write(<#<img border="0" width="15" height="15" src="http://rsdn.org/Forum/Images/down.gif">#>);
+        | <#:super:#>   => writer.Write(<#<img border="0" width="26" height="28" src="http://rsdn.org/Forum/Images/super.gif">#>);
+        | <#:shuffle:#> => writer.Write(<#<img border="0" width="15" height="20" src="http://rsdn.org/Forum/Images/shuffle.gif">#>);
+        | <#:wow:#>     => writer.Write(<#<img border="0" width="19" height="19" src="http://rsdn.org/Forum/Images/wow.gif">#>);
+        | <#:crash:#>   => writer.Write(<#<img border="0" width="30" height="30" src="http://rsdn.org/Forum/Images/crash.gif">#>);
+        | <#:user:#>    => writer.Write(<#<img border="0" width="40" height="20" src="http://rsdn.org/Forum/Images/user.gif">#>);
+        | <#:maniac:#>  => writer.Write(<#<img border="0" width="70" height="25" src="http://rsdn.org/Forum/Images/maniac.gif">#>);
+        | <#:xz:#>      => writer.Write(<#<img border="0" width="37" height="15" src="http://rsdn.org/Forum/Images/xz.gif">#>);
+        | <#:beer:#>    => writer.Write(<#<img border="0" width="57" height="16" src="http://rsdn.org/Forum/Images/beer.gif">#>);
         | text          => HtmlEncode(text, writer);
       }
     }
